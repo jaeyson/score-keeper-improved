@@ -153,10 +153,7 @@ type alias Model =
 
 init : Model
 init =
-  { calories = 0
-  , input = 0
-  , error = Nothing
-  }
+  Model 0 0 Nothing
 
 
 

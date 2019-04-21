@@ -132,10 +132,12 @@ main =
                 (element ())
 
         Err errors ->
+            {--
             let
                 _ =
                     Debug.log "Error Parsing Document" errors
             in
+            --}
             Element.layout
                 []
                 (Element.text "Error parsing document!")

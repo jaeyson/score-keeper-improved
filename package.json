@@ -1,0 +1,18 @@
+{
+  "name": "elm-sample",
+  "version": "1.0.0",
+  "description": "making blog using mdgriffith/elm-markup",
+  "main": "elm.js",
+  "dependencies": {},
+  "devDependencies": {
+    "watch": "^1.0.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "./optimize.sh src/Main.elm",
+    "watch": "watch 'npm run build' ./src"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

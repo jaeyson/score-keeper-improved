@@ -5,9 +5,18 @@
   <title>Sample</title>
   <script src="elm.min.js"></script>
   <link rel="stylesheet" href="app.css">
+  <style>
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+
+  }
+  </style>
 </head>
 <body>
-  <div id="elm"></div>
+  <div class="container">
+    <div id="elm"></div>
+  </div>
 
   <script>
     const app = Elm.Main.init({

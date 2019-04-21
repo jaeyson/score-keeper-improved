@@ -3,10 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <title>Sample</title>
+  <script src="elm.min.js"></script>
+  <link rel="stylesheet" href="app.css">
 </head>
-  <style>
-  </style>
 <body>
-  <script></script>
+  <div id="elm"></div>
+
+  <script>
+    const app = Elm.Main.init({
+      node: document.getElementById('elm')
+    });
+  </script>
 </body>
 </html>

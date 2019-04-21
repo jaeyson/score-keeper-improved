@@ -6,21 +6,13 @@ import Html.Events exposing (..)
 import Markdown
 
 
-values = """
-15
--15
-8
-"""
+main =
+  Browser.sandbox
+    { init = "foo"
+    , update = \_ m -> String.reverse m
+    , view = \m -> button [onClick 0] [text m]}
 
-sumFreq input =
-  input
-  |> String.split "\n"
-  --|> List.filter (String.isEmpty >> not)
-  |> List.filterMap (String.toInt)
-  |> List.sum
 
-result =
-  sumFreq values
 {--
 
 Planning Basketball Scorekeeper App

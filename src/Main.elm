@@ -63,12 +63,22 @@ save model =
   let
       newPlayer =
         Player (List.length model.players) model.name
+
       allPlayers =
         newPlayer :: model.players
+
+      isNameDuplicate =
+        model.players
+        |> List.map .name
+        |> List.member model.name
   in
-      { model | players = allPlayers
-              , name = ""
-      }
+      case isNameDuplicate of
+        True ->
+          { model | name = "" }
+        False ->
+          { model | players = allPlayers
+                  , name = ""
+          }
 
 edit : Int -> String -> List Player
 edit playerId newName =

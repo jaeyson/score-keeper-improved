@@ -1,4 +1,5 @@
 ## elm-sample
+<!--
 making blog using mdgriffith/elm-markup
 
 using:
@@ -6,9 +7,13 @@ using:
 - [x] [elm-markup](https://package.elm-lang.org/packages/mdgriffith/elm-markup/latest/)
 - [x] [elm-ui](https://package.elm-lang.org/packages/mdgriffith/elm-ui/latest/)
 - [x] [elm/parser](https://package.elm-lang.org/packages/elm/parser/latest/)
+-->
 
 ```bash
 $ npm install
 
 $ npm run watch # for watch elm build
 ```
+
+[//]: # (This syntax works like a comment, and won't appear in any output.)
+[//]: # (It’s a little bizarre, but it works with MacDown and Pandoc.)

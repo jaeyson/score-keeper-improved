@@ -4310,7 +4310,6 @@ function _Browser_load(url)
 		}
 	}));
 }
-var elm$core$Maybe$Nothing = {$: 'Nothing'};
 var elm$core$Basics$EQ = {$: 'EQ'};
 var elm$core$Basics$LT = {$: 'LT'};
 var elm$core$Elm$JsArray$foldr = _JsArray_foldr;
@@ -4391,10 +4390,10 @@ var elm$core$Set$toList = function (_n0) {
 	var dict = _n0.a;
 	return elm$core$Dict$keys(dict);
 };
-var author$project$Main$init = {name: '', playerId: elm$core$Maybe$Nothing, players: _List_Nil, scoreHistory: _List_Nil};
-var author$project$Main$Player = F3(
-	function (name, id, totalPointsScored) {
-		return {id: id, name: name, totalPointsScored: totalPointsScored};
+var author$project$Main$init = {name: '', players: _List_Nil};
+var author$project$Main$Player = F2(
+	function (id, name) {
+		return {id: id, name: name};
 	});
 var elm$core$Basics$add = _Basics_add;
 var elm$core$List$foldl = F3(
@@ -4426,25 +4425,15 @@ var elm$core$List$length = function (xs) {
 		0,
 		xs);
 };
-var author$project$Main$add = function (model) {
-	var addPlayer = A3(
+var author$project$Main$save = function (model) {
+	var newPlayer = A2(
 		author$project$Main$Player,
-		model.name,
 		elm$core$List$length(model.players),
-		0);
-	var newPlayers = A2(elm$core$List$cons, addPlayer, model.players);
+		model.name);
+	var allPlayers = A2(elm$core$List$cons, newPlayer, model.players);
 	return _Utils_update(
 		model,
-		{name: '', players: newPlayers});
-};
-var author$project$Main$save = function (model) {
-	var _n0 = model.playerId;
-	if (_n0.$ === 'Just') {
-		var id = _n0.a;
-		return model;
-	} else {
-		return author$project$Main$add(model);
-	}
+		{name: '', players: allPlayers});
 };
 var elm$core$Basics$eq = _Utils_equal;
 var elm$core$String$isEmpty = function (string) {
@@ -4453,7 +4442,7 @@ var elm$core$String$isEmpty = function (string) {
 var author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
-			case 'Cancel':
+			case 'Clear':
 				return _Utils_update(
 					model,
 					{name: ''});
@@ -4637,6 +4626,7 @@ var elm$core$Array$initialize = F2(
 var elm$core$Maybe$Just = function (a) {
 	return {$: 'Just', a: a};
 };
+var elm$core$Maybe$Nothing = {$: 'Nothing'};
 var elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -4868,25 +4858,10 @@ var author$project$Main$debugSection = function (model) {
 				_List_Nil,
 				_List_fromArray(
 					[
-						elm$html$Html$text('Model')
-					])),
-				A2(
-				elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						elm$html$Html$text(
-						elm$core$Debug$toString(model))
-					])),
-				A2(
-				elm$html$Html$h3,
-				_List_Nil,
-				_List_fromArray(
-					[
 						elm$html$Html$text('Name')
 					])),
 				A2(
-				elm$html$Html$div,
+				elm$html$Html$h3,
 				_List_Nil,
 				_List_fromArray(
 					[
@@ -4901,46 +4876,16 @@ var author$project$Main$debugSection = function (model) {
 						elm$html$Html$text('Players')
 					])),
 				A2(
-				elm$html$Html$div,
+				elm$html$Html$h3,
 				_List_Nil,
 				_List_fromArray(
 					[
 						elm$html$Html$text(
 						elm$core$Debug$toString(model.players))
-					])),
-				A2(
-				elm$html$Html$h3,
-				_List_Nil,
-				_List_fromArray(
-					[
-						elm$html$Html$text('Player Id')
-					])),
-				A2(
-				elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						elm$html$Html$text(
-						elm$core$Debug$toString(model.playerId))
-					])),
-				A2(
-				elm$html$Html$h3,
-				_List_Nil,
-				_List_fromArray(
-					[
-						elm$html$Html$text('Score History')
-					])),
-				A2(
-				elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						elm$html$Html$text(
-						elm$core$Debug$toString(model.scoreHistory))
 					]))
 			]));
 };
-var author$project$Main$Cancel = {$: 'Cancel'};
+var author$project$Main$Clear = {$: 'Clear'};
 var author$project$Main$Input = function (a) {
 	return {$: 'Input', a: a};
 };
@@ -5086,7 +5031,7 @@ var elm$html$Html$Events$onSubmit = function (msg) {
 			elm$html$Html$Events$alwaysPreventDefault,
 			elm$json$Json$Decode$succeed(msg)));
 };
-var author$project$Main$playerForm = function (model) {
+var author$project$Main$playerInput = function (model) {
 	return A2(
 		elm$html$Html$form,
 		_List_fromArray(
@@ -5100,8 +5045,8 @@ var author$project$Main$playerForm = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$Attributes$type_('text'),
-						elm$html$Html$Attributes$placeholder('Enter player name...'),
 						elm$html$Html$Events$onInput(author$project$Main$Input),
+						elm$html$Html$Attributes$placeholder('Enter Player...'),
 						elm$html$Html$Attributes$value(model.name)
 					]),
 				_List_Nil),
@@ -5119,8 +5064,8 @@ var author$project$Main$playerForm = function (model) {
 				elm$html$Html$button,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$type_('submit'),
-						elm$html$Html$Events$onClick(author$project$Main$Cancel)
+						elm$html$Html$Attributes$type_('button'),
+						elm$html$Html$Events$onClick(author$project$Main$Clear)
 					]),
 				_List_fromArray(
 					[
@@ -5142,16 +5087,14 @@ var author$project$Main$player = function (playerModel) {
 				elm$html$Html$i,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('far'),
-						elm$html$Html$Attributes$class('fa-trash-alt')
+						elm$html$Html$Attributes$class('far fa-trash-alt')
 					]),
 				_List_Nil),
 				A2(
 				elm$html$Html$i,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('far'),
-						elm$html$Html$Attributes$class('fa-edit')
+						elm$html$Html$Attributes$class('far fa-edit')
 					]),
 				_List_Nil),
 				A2(
@@ -5169,8 +5112,7 @@ var author$project$Main$player = function (playerModel) {
 				_List_Nil,
 				_List_fromArray(
 					[
-						elm$html$Html$text(
-						elm$core$String$fromInt(playerModel.totalPointsScored))
+						elm$html$Html$text('score here')
 					]))
 			]));
 };
@@ -5195,8 +5137,6 @@ var author$project$Main$playerSection = function (model) {
 		_List_Nil,
 		A2(elm$core$List$map, author$project$Main$player, model.players));
 };
-var elm$html$Html$h1 = _VirtualDom_node('h1');
-var elm$html$Html$header = _VirtualDom_node('header');
 var author$project$Main$view = function (model) {
 	return A2(
 		elm$html$Html$div,
@@ -5215,34 +5155,14 @@ var author$project$Main$view = function (model) {
 				_List_fromArray(
 					[
 						A2(
-						elm$html$Html$h1,
+						elm$html$Html$h3,
 						_List_Nil,
 						_List_fromArray(
 							[
-								elm$html$Html$text('Score Keeper')
-							])),
-						A2(
-						elm$html$Html$header,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								elm$html$Html$div,
-								_List_Nil,
-								_List_fromArray(
-									[
-										elm$html$Html$text('Name')
-									])),
-								A2(
-								elm$html$Html$div,
-								_List_Nil,
-								_List_fromArray(
-									[
-										elm$html$Html$text('Points')
-									]))
+								elm$html$Html$text('Name')
 							])),
 						author$project$Main$playerSection(model),
-						author$project$Main$playerForm(model)
+						author$project$Main$playerInput(model)
 					])),
 				A2(
 				elm$html$Html$div,

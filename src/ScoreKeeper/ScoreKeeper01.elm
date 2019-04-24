@@ -149,7 +149,7 @@ playerForm model =
     , button [ type_ "button"
               , onClick Cancel
               ]
-        [ text "Save" ]
+        [ text "Cancel" ]
     ]
 ----------------------------------------------------------
 --            End of playerForm

@@ -1,23 +1,19 @@
 module Main exposing (..)
-{--}
 import Browser exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Debug exposing (..)
-{--}
 
 
 -- Main
 
-{--}
 main =
   Browser.sandbox
     { init = init
     , update = update
     , view = view
     }
-{--}
 
 
 
@@ -39,21 +35,10 @@ init =
   , players = []
   }
 
-{--
-init : Model
-init =
-  { name = "John Smith"
-  , players = [ { id = 1, name = "John Smith" }
-              , { id = 0, name = "John Doe" }
-              ]
-  }
---}
-
 
 
 -- Update
 
-{--}
 type Msg
   = Save
   | Clear
@@ -72,7 +57,6 @@ update msg model =
           model
         False ->
           save model
---}
 
 save : Model -> Model
 save model =
@@ -104,7 +88,6 @@ setPlayerName newName playerRecord =
 
 -- View
 
-{--}
 view : Model -> Html Msg
 view model =
   div [ class "row" ]
@@ -155,5 +138,4 @@ debugSection model =
     , h3 [] [ text "Players" ]
     , h3 [] [ text (Debug.toString model.players) ]
     ]
-{--}
 

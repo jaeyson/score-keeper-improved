@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>Sample</title>
-  <script src="elm.min.js"></script>
   <link rel="stylesheet" href="app.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <script src="elm.js"></script>
   <style>
   .block {
     display: block;
@@ -29,6 +30,28 @@
     flex-direction: row;
     flex-wrap: wrap;
     width: 100%;
+  }
+  li:hover {
+    background: #efeff1;
+  }
+  span {
+    flex-basis: 20%;
+    text-align: center;
+    align-self: center;
+  }
+  span.player-name {
+    flex-basis: 80%;
+    text-align: left;
+  }
+  span.player-name:hover {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  i.fa-trash-alt:hover {
+    color: red;
+  }
+  i.fa-edit:hover {
+    color: purple;
   }
   </style>
 </head>

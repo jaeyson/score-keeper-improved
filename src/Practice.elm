@@ -45,7 +45,7 @@ type Msg
   | Clear
   | Add
   | Edit String
-  | Delete Content
+  | Delete String
 
 update : Msg -> Model -> Model
 update msg model =
@@ -68,6 +68,16 @@ update msg model =
       { model | input = editValue
               , mode = EditMode
       }
+    Delete deleteValue ->
+      let
+          result =
+            model.contents
+            |> List.filter (\p -> p.content /= deleteValue)
+      in
+        { model | contents = result
+                , input = ""
+                , mode = ViewMode
+        }
 
 add model =
   let
@@ -143,8 +153,11 @@ contentList model =
 
 lists : Content -> Html Msg
 lists listContent =
-  li [ onClick (Edit listContent.content) ]
-    [ span [] [ text "Edit - " ]
+  li []
+    [ span [ onClick (Delete listContent.content) ]
+        [ text "Delete - " ]
+    , span [ onClick (Edit listContent.content) ]
+        [ text "Edit - " ]
     , span [] [ text listContent.content ]
     ]
 

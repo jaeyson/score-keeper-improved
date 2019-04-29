@@ -40,6 +40,7 @@ type Msg
   = Content
   | Input String
   | Clear
+  | Edit
 
 update : Msg -> Model -> Model
 update msg model =
@@ -51,6 +52,8 @@ update msg model =
       { model | input = str }
     Clear ->
       init
+    Edit ->
+      { model | input = model.content }
 
 
 
@@ -60,7 +63,7 @@ update msg model =
 view : Model -> Html Msg
 view model =
   div []
-    [ h3 []
+    [ h3 [ onClick Edit ]
         [ text ("Content: " ++ model.content) ]
     , input [ type_ "text"
             , placeholder "enter content"

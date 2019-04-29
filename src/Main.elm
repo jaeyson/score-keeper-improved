@@ -120,8 +120,9 @@ player : Player -> Html Msg
 player playerModel =
   li []
     [ i [ class "far fa-trash-alt" ] []
-    , i [ class "far fa-edit" ] []
-    , span [ class "player-name" ] [text (playerModel.name) ]
+    , i [ class "far fa-edit" ]
+        []
+    , span [ class "player-name", onClick Edit ] [text (playerModel.name) ]
     , span [] [ text "score here" ]
     ]
 

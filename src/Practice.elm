@@ -54,8 +54,10 @@ update msg model =
       { model | input = ""
               , mode = ViewMode
       }
+
     Input value ->
       { model | input = value }
+
     Add ->
       case (String.isEmpty model.input) of
         True ->
@@ -64,20 +66,14 @@ update msg model =
           }
         False ->
           add model
+
     Edit editValue ->
       { model | input = editValue
               , mode = EditMode
       }
+
     Delete deleteValue ->
-      let
-          result =
-            model.contents
-            |> List.filter (\p -> p.content /= deleteValue)
-      in
-        { model | contents = result
-                , input = ""
-                , mode = ViewMode
-        }
+      delete model deleteValue
 
 add model =
   let
@@ -101,6 +97,17 @@ add model =
                   , input = ""
                   , mode = ViewMode
           }
+
+delete model deleteModel =
+  let
+      result =
+        model.contents
+        |> List.filter (\p -> p.content /= deleteModel)
+  in
+    { model | contents = result
+            , input = ""
+            , mode = ViewMode
+    }
 
 {--
 edit model =

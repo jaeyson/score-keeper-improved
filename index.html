@@ -31,10 +31,21 @@
     flex-wrap: wrap;
     width: 100%;
   }
+  .header-player {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 16px;
+  }
+  .header-player > span:first-child {
+    padding-left: 5rem;
+  }
+  li {
+    align-items: center;
+  }
   li:hover {
     background: lightblue;
   }
-  span {
+  span.player-score {
     flex-basis: 20%;
     text-align: center;
     align-self: center;
@@ -61,6 +72,11 @@
   button[type="button"]:hover {
     background: red;
   }
+  .points-button {
+    border: 2px solid grey;
+    padding: 0 8px;
+    margin: 0 8px;
+  }
   </style>
 </head>
 <body>
@@ -69,7 +85,7 @@
   </div>
 
   <script>
-    const app = Elm.Main.init({
+    const app = Elm.Practice.init({
       node: document.getElementById('elm')
     });
   </script>

@@ -4391,7 +4391,7 @@ var elm$core$Set$toList = function (_n0) {
 	var dict = _n0.a;
 	return elm$core$Dict$keys(dict);
 };
-var author$project$Main$init = {id: elm$core$Maybe$Nothing, name: '', players: _List_Nil};
+var author$project$Practice$init = {id: elm$core$Maybe$Nothing, name: '', players: _List_Nil, score: _List_Nil};
 var elm$core$Basics$apR = F2(
 	function (x, f) {
 		return f(x);
@@ -4487,21 +4487,21 @@ var elm$core$List$filter = F2(
 			_List_Nil,
 			list);
 	});
-var author$project$Main$delete = F2(
+var author$project$Practice$delete = F2(
 	function (model, deletePlayerName) {
 		var result = A2(
 			elm$core$List$filter,
-			function (deleteplayer) {
-				return !_Utils_eq(deleteplayer.name, deletePlayerName);
+			function (deletePlayer) {
+				return !_Utils_eq(deletePlayer.name, deletePlayerName);
 			},
 			model.players);
 		return _Utils_update(
 			model,
 			{id: elm$core$Maybe$Nothing, name: '', players: result});
 	});
-var author$project$Main$Player = F2(
-	function (id, name) {
-		return {id: id, name: name};
+var author$project$Practice$Player = F3(
+	function (id, name, totalPointsScored) {
+		return {id: id, name: name, totalPointsScored: totalPointsScored};
 	});
 var elm$core$List$length = function (xs) {
 	return A3(
@@ -4513,17 +4513,18 @@ var elm$core$List$length = function (xs) {
 		0,
 		xs);
 };
-var author$project$Main$add = function (model) {
-	var newPlayer = A2(
-		author$project$Main$Player,
+var author$project$Practice$add = function (model) {
+	var newPlayer = A3(
+		author$project$Practice$Player,
 		elm$core$List$length(model.players),
-		model.name);
+		model.name,
+		0);
 	var allPlayers = A2(elm$core$List$cons, newPlayer, model.players);
 	return _Utils_update(
 		model,
 		{id: elm$core$Maybe$Nothing, name: '', players: allPlayers});
 };
-var author$project$Main$setPlayerName = F2(
+var author$project$Practice$setPlayerName = F2(
 	function (model, newName) {
 		return _Utils_update(
 			model,
@@ -4544,14 +4545,14 @@ var elm$core$List$map = F2(
 			_List_Nil,
 			xs);
 	});
-var author$project$Main$edit = F2(
+var author$project$Practice$edit = F2(
 	function (model, value) {
 		var result = A2(
 			elm$core$List$map,
 			function (content) {
 				var _n0 = _Utils_eq(content.id, value);
 				if (_n0) {
-					return A2(author$project$Main$setPlayerName, content, model.name);
+					return A2(author$project$Practice$setPlayerName, content, model.name);
 				} else {
 					return content;
 				}
@@ -4561,22 +4562,45 @@ var author$project$Main$edit = F2(
 			model,
 			{id: elm$core$Maybe$Nothing, name: '', players: result});
 	});
-var author$project$Main$save = function (model) {
+var author$project$Practice$save = function (model) {
 	var _n0 = model.id;
 	if (_n0.$ === 'Just') {
 		var playerId = _n0.a;
-		return A2(author$project$Main$edit, model, playerId);
+		return A2(author$project$Practice$edit, model, playerId);
 	} else {
-		return author$project$Main$add(model);
+		return author$project$Practice$add(model);
 	}
 };
+var author$project$Practice$setPlayerScore = F2(
+	function (model, points) {
+		return _Utils_update(
+			model,
+			{totalPointsScored: model.totalPointsScored + points});
+	});
+var author$project$Practice$score = F3(
+	function (model, points, scorePlayerId) {
+		var result = A2(
+			elm$core$List$map,
+			function (scorePlayer) {
+				var _n0 = _Utils_eq(scorePlayer.id, scorePlayerId);
+				if (_n0) {
+					return A2(author$project$Practice$setPlayerScore, scorePlayer, points);
+				} else {
+					return scorePlayer;
+				}
+			},
+			model.players);
+		return _Utils_update(
+			model,
+			{id: elm$core$Maybe$Nothing, name: '', players: result});
+	});
 var elm$core$Maybe$Just = function (a) {
 	return {$: 'Just', a: a};
 };
 var elm$core$String$isEmpty = function (string) {
 	return string === '';
 };
-var author$project$Main$update = F2(
+var author$project$Practice$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
 			case 'ClearButton':
@@ -4595,9 +4619,9 @@ var author$project$Main$update = F2(
 						model,
 						{name: ''});
 				} else {
-					return author$project$Main$save(model);
+					return author$project$Practice$save(model);
 				}
-			case 'EditButton':
+			case 'EditPlayer':
 				var playerName = msg.a;
 				var playerId = msg.b;
 				return _Utils_update(
@@ -4606,9 +4630,13 @@ var author$project$Main$update = F2(
 						id: elm$core$Maybe$Just(playerId),
 						name: playerName
 					});
-			default:
+			case 'DeletePlayer':
 				var deletePlayerName = msg.a;
-				return A2(author$project$Main$delete, model, deletePlayerName);
+				return A2(author$project$Practice$delete, model, deletePlayerName);
+			default:
+				var points = msg.a;
+				var playerId = msg.b;
+				return A3(author$project$Practice$score, model, points, playerId);
 		}
 	});
 var elm$core$Debug$toString = _Debug_toString;
@@ -4986,7 +5014,7 @@ var elm$html$Html$div = _VirtualDom_node('div');
 var elm$html$Html$h3 = _VirtualDom_node('h3');
 var elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
 var elm$html$Html$text = elm$virtual_dom$VirtualDom$text;
-var author$project$Main$debugSection = function (model) {
+var author$project$Practice$debugSection = function (model) {
 	return A2(
 		elm$html$Html$div,
 		_List_Nil,
@@ -5021,11 +5049,11 @@ var author$project$Main$debugSection = function (model) {
 					]))
 			]));
 };
-var author$project$Main$ClearButton = {$: 'ClearButton'};
-var author$project$Main$Input = function (a) {
+var author$project$Practice$ClearButton = {$: 'ClearButton'};
+var author$project$Practice$Input = function (a) {
 	return {$: 'Input', a: a};
 };
-var author$project$Main$SaveButton = {$: 'SaveButton'};
+var author$project$Practice$SaveButton = {$: 'SaveButton'};
 var elm$html$Html$button = _VirtualDom_node('button');
 var elm$html$Html$form = _VirtualDom_node('form');
 var elm$html$Html$input = _VirtualDom_node('input');
@@ -5112,12 +5140,12 @@ var elm$html$Html$Events$onSubmit = function (msg) {
 			elm$html$Html$Events$alwaysPreventDefault,
 			elm$json$Json$Decode$succeed(msg)));
 };
-var author$project$Main$playerInput = function (model) {
+var author$project$Practice$playerInput = function (model) {
 	return A2(
 		elm$html$Html$form,
 		_List_fromArray(
 			[
-				elm$html$Html$Events$onSubmit(author$project$Main$SaveButton)
+				elm$html$Html$Events$onSubmit(author$project$Practice$SaveButton)
 			]),
 		_List_fromArray(
 			[
@@ -5126,7 +5154,7 @@ var author$project$Main$playerInput = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$Attributes$type_('text'),
-						elm$html$Html$Events$onInput(author$project$Main$Input),
+						elm$html$Html$Events$onInput(author$project$Practice$Input),
 						elm$html$Html$Attributes$placeholder('Enter Player...'),
 						elm$html$Html$Attributes$value(model.name)
 					]),
@@ -5146,7 +5174,7 @@ var author$project$Main$playerInput = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$Attributes$type_('button'),
-						elm$html$Html$Events$onClick(author$project$Main$ClearButton)
+						elm$html$Html$Events$onClick(author$project$Practice$ClearButton)
 					]),
 				_List_fromArray(
 					[
@@ -5154,18 +5182,22 @@ var author$project$Main$playerInput = function (model) {
 					]))
 			]));
 };
-var author$project$Main$DeleteButton = function (a) {
-	return {$: 'DeleteButton', a: a};
+var author$project$Practice$DeletePlayer = function (a) {
+	return {$: 'DeletePlayer', a: a};
 };
-var author$project$Main$EditButton = F2(
+var author$project$Practice$EditPlayer = F2(
 	function (a, b) {
-		return {$: 'EditButton', a: a, b: b};
+		return {$: 'EditPlayer', a: a, b: b};
+	});
+var author$project$Practice$ScoreButton = F2(
+	function (a, b) {
+		return {$: 'ScoreButton', a: a, b: b};
 	});
 var elm$html$Html$i = _VirtualDom_node('i');
 var elm$html$Html$li = _VirtualDom_node('li');
 var elm$html$Html$span = _VirtualDom_node('span');
 var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
-var author$project$Main$player = function (playerModel) {
+var author$project$Practice$player = function (playerModel) {
 	return A2(
 		elm$html$Html$li,
 		_List_Nil,
@@ -5177,7 +5209,7 @@ var author$project$Main$player = function (playerModel) {
 					[
 						elm$html$Html$Attributes$class('far fa-trash-alt'),
 						elm$html$Html$Events$onClick(
-						author$project$Main$DeleteButton(playerModel.name))
+						author$project$Practice$DeletePlayer(playerModel.name))
 					]),
 				_List_Nil),
 				A2(
@@ -5186,7 +5218,7 @@ var author$project$Main$player = function (playerModel) {
 					[
 						elm$html$Html$Attributes$class('far fa-edit'),
 						elm$html$Html$Events$onClick(
-						A2(author$project$Main$EditButton, playerModel.name, playerModel.id))
+						A2(author$project$Practice$EditPlayer, playerModel.name, playerModel.id))
 					]),
 				_List_Nil),
 				A2(
@@ -5195,7 +5227,7 @@ var author$project$Main$player = function (playerModel) {
 					[
 						elm$html$Html$Attributes$class('player-name'),
 						elm$html$Html$Events$onClick(
-						A2(author$project$Main$EditButton, playerModel.name, playerModel.id))
+						A2(author$project$Practice$EditPlayer, playerModel.name, playerModel.id))
 					]),
 				_List_fromArray(
 					[
@@ -5206,18 +5238,64 @@ var author$project$Main$player = function (playerModel) {
 				_List_Nil,
 				_List_fromArray(
 					[
-						elm$html$Html$text('score here')
+						A2(
+						elm$html$Html$span,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('points-button'),
+								elm$html$Html$Events$onClick(
+								A2(author$project$Practice$ScoreButton, 1, playerModel.id))
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('1')
+							])),
+						A2(
+						elm$html$Html$span,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('points-button'),
+								elm$html$Html$Events$onClick(
+								A2(author$project$Practice$ScoreButton, 2, playerModel.id))
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('2')
+							])),
+						A2(
+						elm$html$Html$span,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('points-button'),
+								elm$html$Html$Events$onClick(
+								A2(author$project$Practice$ScoreButton, 3, playerModel.id))
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('3')
+							]))
+					])),
+				A2(
+				elm$html$Html$span,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('player-score')
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text(
+						elm$core$String$fromInt(playerModel.totalPointsScored))
 					]))
 			]));
 };
 var elm$html$Html$ul = _VirtualDom_node('ul');
-var author$project$Main$playerSection = function (model) {
+var author$project$Practice$playerSection = function (model) {
 	return A2(
 		elm$html$Html$ul,
 		_List_Nil,
-		A2(elm$core$List$map, author$project$Main$player, model.players));
+		A2(elm$core$List$map, author$project$Practice$player, model.players));
 };
-var author$project$Main$view = function (model) {
+var author$project$Practice$view = function (model) {
 	return A2(
 		elm$html$Html$div,
 		_List_fromArray(
@@ -5236,13 +5314,29 @@ var author$project$Main$view = function (model) {
 					[
 						A2(
 						elm$html$Html$h3,
-						_List_Nil,
 						_List_fromArray(
 							[
-								elm$html$Html$text('Name')
+								elm$html$Html$Attributes$class('header-player')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								elm$html$Html$span,
+								_List_Nil,
+								_List_fromArray(
+									[
+										elm$html$Html$text('Name')
+									])),
+								A2(
+								elm$html$Html$span,
+								_List_Nil,
+								_List_fromArray(
+									[
+										elm$html$Html$text('Points')
+									]))
 							])),
-						author$project$Main$playerSection(model),
-						author$project$Main$playerInput(model)
+						author$project$Practice$playerSection(model),
+						author$project$Practice$playerInput(model)
 					])),
 				A2(
 				elm$html$Html$div,
@@ -5252,7 +5346,7 @@ var author$project$Main$view = function (model) {
 					]),
 				_List_fromArray(
 					[
-						author$project$Main$debugSection(model)
+						author$project$Practice$debugSection(model)
 					]))
 			]));
 };
@@ -5501,7 +5595,7 @@ var elm$browser$Browser$sandbox = function (impl) {
 			view: impl.view
 		});
 };
-var author$project$Main$main = elm$browser$Browser$sandbox(
-	{init: author$project$Main$init, update: author$project$Main$update, view: author$project$Main$view});
-_Platform_export({'Main':{'init':author$project$Main$main(
+var author$project$Practice$main = elm$browser$Browser$sandbox(
+	{init: author$project$Practice$init, update: author$project$Practice$update, view: author$project$Practice$view});
+_Platform_export({'Practice':{'init':author$project$Practice$main(
 	elm$json$Json$Decode$succeed(_Utils_Tuple0))(0)}});}(this));

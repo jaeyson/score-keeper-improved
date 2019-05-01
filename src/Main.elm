@@ -84,6 +84,20 @@ save model =
       edit model playerId
     Nothing ->
       add model
+  {--
+  let
+      isDuplicateContent =
+        model.contents
+        |> List.map .content
+        |> List.member model.input
+  in
+      case isDuplicateContent of
+        True ->
+          edit model
+
+        False ->
+          add model
+  --}
 
 add model =
   let

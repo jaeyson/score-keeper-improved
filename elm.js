@@ -4523,6 +4523,12 @@ var author$project$Main$add = function (model) {
 		model,
 		{id: elm$core$Maybe$Nothing, name: '', players: allPlayers});
 };
+var author$project$Main$setPlayerName = F2(
+	function (model, newName) {
+		return _Utils_update(
+			model,
+			{name: newName});
+	});
 var elm$core$Basics$eq = _Utils_equal;
 var elm$core$List$map = F2(
 	function (f, xs) {
@@ -4543,9 +4549,12 @@ var author$project$Main$edit = F2(
 		var result = A2(
 			elm$core$List$map,
 			function (content) {
-				return _Utils_eq(content.id, value) ? _Utils_update(
-					content,
-					{name: model.name}) : content;
+				var _n0 = _Utils_eq(content.id, value);
+				if (_n0) {
+					return A2(author$project$Main$setPlayerName, content, model.name);
+				} else {
+					return content;
+				}
 			},
 			model.players);
 		return _Utils_update(

@@ -3,9 +3,11 @@ import Browser exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Debug exposing (..)
 
 
 -- Main
+
 main =
   Browser.sandbox
     { init = init
@@ -17,22 +19,30 @@ main =
 
 -- Model
 
-type alias Content =
-  { content : String
-  , id : Int
+type alias Model =
+  { name : String
+  , players : List Player
+  , id : Maybe Int
+  , score : List ScoreHistory
   }
 
-type alias Model =
-  { contents : List Content
-  , input : String
-  , id : Maybe Int
+type alias Player =
+  { id : Int
+  , name : String
+  , totalPointsScored : Int
+  }
+
+type alias ScoreHistory =
+  { name : String
+  , points : Int
   }
 
 init : Model
 init =
-  { contents = []
-  , input = ""
+  { name = ""
+  , players = []
   , id = Nothing
+  , score = []
   }
 
 
@@ -43,45 +53,49 @@ type Msg
   = Input String
   | ClearButton
   | SaveButton
-  | EditButton String Int
-  | DeleteButton String
+  | EditPlayer String Int
+  | DeletePlayer String
+  | ScoreButton Int Int
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
+
     ClearButton ->
-      { model | input = ""
+      { model | name = ""
               , id = Nothing
       }
 
-    Input value ->
-      { model | input = value
+    Input name ->
+      { model | name = name
       }
 
     SaveButton ->
-      case (String.isEmpty model.input) of
+      case (String.isEmpty model.name) of
         True ->
-          { model | input = ""
+          { model | name = ""
           }
+
         False ->
           save model
 
-    EditButton editValue editId ->
-      { model | input = editValue
-              , id = Just editId
+    EditPlayer playerName playerId->
+      { model | name = playerName
+              , id =  Just playerId
       }
 
-    DeleteButton deleteValue ->
-      delete model deleteValue
+    DeletePlayer deletePlayerName ->
+      delete model deletePlayerName
+
+    ScoreButton points playerId ->
+      score model points playerId
 
 save model =
   case model.id of
-    Just value ->
-      edit model value
+    Just playerId ->
+      edit model playerId
     Nothing ->
       add model
-
-
   {--
   let
       isDuplicateContent =
@@ -99,100 +113,176 @@ save model =
 
 add model =
   let
-      newContent =
-        Content model.input (List.length model.contents)
+      newPlayer =
+        Player (List.length model.players) model.name 0
 
-      allContents =
-        newContent :: model.contents
+      allPlayers =
+        newPlayer :: model.players
   in
-      { model | contents = allContents
+      { model | players = allPlayers
+              , name = ""
               , id = Nothing
-              , input = ""
       }
 
+-- edit model playerId
 edit model value =
-      let
-          result =
-            model.contents
-            |> List.map (\content ->
-                if content.id == value then
-                  { content | content = model.input
-                  }
-                else
-                  content
-              )
-      in
-          { model | contents = result
-                  , id = Nothing
-                  , input = ""
-          }
-
-delete model deleteModel =
   let
       result =
-        model.contents
-        |> List.filter (\p -> p.content /= deleteModel)
+        model.players
+        |> List.map (\content ->
+            case (content.id == value) of
+              True ->
+                setPlayerName content model.name
+              False ->
+                content
+          )
   in
-      { model | contents = result
-              , input = ""
+      { model | players = result
+              , name = ""
               , id = Nothing
       }
 
+-- Helper Function
+setPlayerName model newName =
+  { model | name  = newName
+  }
 
+delete : Model -> String -> Model
+delete model deletePlayerName =
+  let
+      result =
+        model.players
+        |> List.filter (\deletePlayer -> deletePlayer.name /= deletePlayerName)
+  in
+      { model | players = result
+              , name = ""
+              , id = Nothing
+      }
+
+score model points scorePlayerId =
+  let
+      result =
+        model.players
+        |> List.map (\scorePlayer ->
+            case (scorePlayer.id == scorePlayerId) of
+              True ->
+                setPlayerScore scorePlayer points
+              False ->
+                scorePlayer
+          )
+  in
+      { model | players = result
+              , name = ""
+              , id = Nothing
+      }
+
+-- Helper Function
+setPlayerScore model points =
+  { model | totalPointsScored = model.totalPointsScored + points
+  }
+
+  {--
+  let
+      result =
+        model.players
+        |> List.map (\scorePlayer ->
+            if scorePlayer.id == scorePlayerId then
+              { scorePlayer | totalPointsScored = scorePlayer.totalPointsScored + points }
+            else
+              scorePlayer
+          )
+  in
+      { model | players = result
+              , name = ""
+              , id = Nothing
+      }
+  --}
 
 -- View
 
 view : Model -> Html Msg
 view model =
-  div []
-    [ contentList model
-    , input [ type_ "text"
-            , placeholder "enter content..."
-            , onInput Input
-            , value ( case (model.input == "") of
-                        True ->
-                          ""
-                        False ->
-                          model.input
-                    )
+  div [ class "row" ]
+    [ div [ class "col" ]
+        [ h3 [ class "header-player" ]
+            [ span [] [ text "Name" ]
+            , span [] [ text "Points" ]
             ]
-        []
-    , button [ type_ "button", onClick SaveButton ]
-        [ text "Add" ]
-    , button [ type_ "button", onClick ClearButton ]
-        [ text "Clear" ]
-    , debugSection model
+        , playerSection model
+        , playerInput model
+        ]
+    , div [ class "col" ]
+        [ debugSection model ]
     ]
 
-contentList : Model -> Html Msg
-contentList model =
-  model.contents
-  |> List.map lists
+playerSection : Model -> Html Msg
+playerSection model =
+  model.players
+  |> List.map player
   |> ul []
 
-lists : Content -> Html Msg
-lists listContent =
+player : Player -> Html Msg
+player playerModel =
   li []
-    [ span [ onClick (DeleteButton listContent.content) ]
-        [ text "Delete - " ]
-    , span [ onClick (EditButton listContent.content listContent.id) ]
-        [ text "Edit - " ]
+    [ i [ class "far fa-trash-alt"
+        , onClick (DeletePlayer playerModel.name)
+        ]
+        []
+    , i [ class "far fa-edit"
+        , onClick (EditPlayer playerModel.name playerModel.id)
+        ]
+        []
+    , span [ class "player-name"
+            , onClick (EditPlayer playerModel.name playerModel.id)
+            ]
+        [text (playerModel.name) ]
     , span []
-        [ text listContent.content ]
+        [ span [ class "points-button"
+                , onClick (ScoreButton 1 playerModel.id)
+                ]
+            [ text "1" ]
+        , span [ class "points-button"
+                , onClick (ScoreButton 2 playerModel.id)
+                ]
+            [ text "2" ]
+        , span [ class "points-button"
+                , onClick (ScoreButton 3 playerModel.id)
+                ]
+            [ text "3" ]
+        ]
+    , span [ class "player-score" ]
+        [ text (String.fromInt playerModel.totalPointsScored) ]
+    ]
+
+playerInput : Model -> Html Msg
+playerInput model =
+  Html.form [ onSubmit SaveButton ]
+    [ input [ type_ "text"
+            , onInput Input
+            , placeholder "Enter Player..."
+            , value model.name
+            ]
+        []
+    , button [ type_ "submit" ]
+        [ text "Save" ]
+    , button [ type_ "button" , onClick ClearButton ]
+        [ text "Cancel" ]
     ]
 
 debugSection : Model -> Html Msg
 debugSection model =
   div []
     [ h3 []
-        [ span [] [ text "Input: " ]
-        , span [] [ text (Debug.toString model.input) ]
+        [ text "Name: "
+        , text (Debug.toString model.name)
         ]
     , h3 []
-        [ span [] [ text "ID: " ]
-        , span [] [ text (Debug.toString model.id) ]
+        [ text "Players: "
+        , text (Debug.toString model.players)
         ]
-    , h3 [] [ text "Content: " ]
-    , h3 [] [ text (Debug.toString model.contents) ]
+    , h3 []
+        [ text "Id: "
+        , text (Debug.toString model.id)
+        ]
     ]
 

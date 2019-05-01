@@ -63,7 +63,6 @@ update msg model =
 
     SaveButton ->
       case (String.isEmpty model.name) of
-
         True ->
           { model | name = ""
           }
@@ -99,37 +98,30 @@ add model =
               , id = Nothing
       }
 
+-- edit model playerId
 edit model value =
   let
       result =
         model.players
         |> List.map (\content ->
-            if content.id == value then
-              { content | name = model.name
-              }
-            else
-              content
+            case (content.id == value) of
+              True ->
+                setPlayerName content model.name
+              False ->
+                content
           )
   in
       { model | players = result
-              , id = Nothing
               , name = ""
+              , id = Nothing
       }
 
-{--
-edit playerId newName =
-  List.map (\editPlayer ->
-    case ( editPlayer.id == playerId ) of
-      True ->
-        setPlayerName newName editPlayer
-      False ->
-        editPlayer
-    ) init.players
+-- Helper Function
+setPlayerName model newName =
+  { model | name  = newName
+  }
 
-setPlayerName newName playerRecord =
-  { playerRecord | name  = newName }
---}
-
+delete : Model -> String -> Model
 delete model deletePlayerName =
   let
       result =

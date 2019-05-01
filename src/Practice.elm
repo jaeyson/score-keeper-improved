@@ -16,24 +16,23 @@ main =
 
 
 -- Model
-type Mode
-  = EditMode
-  | ViewMode
 
 type alias Content =
-  { content : String }
+  { content : String
+  , id : Int
+  }
 
 type alias Model =
   { contents : List Content
   , input : String
-  , mode : Mode
+  , id : Maybe Int
   }
 
 init : Model
 init =
   { contents = []
   , input = ""
-  , mode = ViewMode
+  , id = Nothing
   }
 
 
@@ -42,46 +41,49 @@ init =
 
 type Msg
   = Input String
-  | Clear
-  | Add
-  | Edit String
-  | Delete String
+  | ClearButton
+  | SaveButton
+  | EditButton String Int
+  | DeleteButton String
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    Clear ->
+    ClearButton ->
       { model | input = ""
-              , mode = ViewMode
+              , id = Nothing
       }
 
     Input value ->
-      { model | input = value }
+      { model | input = value
+      }
 
-    Add ->
+    SaveButton ->
       case (String.isEmpty model.input) of
         True ->
           { model | input = ""
-                  , mode = ViewMode
           }
         False ->
-          add model
+          save model
 
-    Edit editValue ->
+    EditButton editValue editId ->
       { model | input = editValue
-              , mode = EditMode
+              , id = Just editId
       }
 
-    Delete deleteValue ->
+    DeleteButton deleteValue ->
       delete model deleteValue
 
-add model =
-  let
-      newContent =
-        Content model.input
-      allContents =
-        newContent :: model.contents
+save model =
+  case model.id of
+    Just value ->
+      edit model value
+    Nothing ->
+      add model
 
+
+  {--
+  let
       isDuplicateContent =
         model.contents
         |> List.map .content
@@ -89,13 +91,40 @@ add model =
   in
       case isDuplicateContent of
         True ->
-          { model | input = ""
-                  , mode = ViewMode
-          }
+          edit model
+
         False ->
-          { model | contents = allContents
+          add model
+  --}
+
+add model =
+  let
+      newContent =
+        Content model.input (List.length model.contents)
+
+      allContents =
+        newContent :: model.contents
+  in
+      { model | contents = allContents
+              , id = Nothing
+              , input = ""
+      }
+
+edit model value =
+      let
+          result =
+            model.contents
+            |> List.map (\content ->
+                if content.id == value then
+                  { content | content = model.input
+                  }
+                else
+                  content
+              )
+      in
+          { model | contents = result
+                  , id = Nothing
                   , input = ""
-                  , mode = ViewMode
           }
 
 delete model deleteModel =
@@ -104,29 +133,10 @@ delete model deleteModel =
         model.contents
         |> List.filter (\p -> p.content /= deleteModel)
   in
-    { model | contents = result
-            , input = ""
-            , mode = ViewMode
-    }
-
-{--
-edit model =
-  let
-      result =
-        model.contents
-        |> List.map .content
-        |> List.filter (\p -> p == model.input)
-        |> List.head
-
-  in
-      case result of
-        Just value ->
-          { model | input = value
-                  , mode = EditMode
-          }
-        Nothing ->
-          model
---}
+      { model | contents = result
+              , input = ""
+              , id = Nothing
+      }
 
 
 
@@ -139,15 +149,17 @@ view model =
     , input [ type_ "text"
             , placeholder "enter content..."
             , onInput Input
-            , value (if model.input == "" then
-                        ""
-                      else
-                        model.input)
+            , value ( case (model.input == "") of
+                        True ->
+                          ""
+                        False ->
+                          model.input
+                    )
             ]
         []
-    , button [ type_ "button", onClick Add ]
+    , button [ type_ "button", onClick SaveButton ]
         [ text "Add" ]
-    , button [ type_ "button", onClick Clear ]
+    , button [ type_ "button", onClick ClearButton ]
         [ text "Clear" ]
     , debugSection model
     ]
@@ -161,11 +173,12 @@ contentList model =
 lists : Content -> Html Msg
 lists listContent =
   li []
-    [ span [ onClick (Delete listContent.content) ]
+    [ span [ onClick (DeleteButton listContent.content) ]
         [ text "Delete - " ]
-    , span [ onClick (Edit listContent.content) ]
+    , span [ onClick (EditButton listContent.content listContent.id) ]
         [ text "Edit - " ]
-    , span [] [ text listContent.content ]
+    , span []
+        [ text listContent.content ]
     ]
 
 debugSection : Model -> Html Msg
@@ -175,79 +188,11 @@ debugSection model =
         [ span [] [ text "Input: " ]
         , span [] [ text (Debug.toString model.input) ]
         ]
+    , h3 []
+        [ span [] [ text "ID: " ]
+        , span [] [ text (Debug.toString model.id) ]
+        ]
     , h3 [] [ text "Content: " ]
     , h3 [] [ text (Debug.toString model.contents) ]
-    , h3 []
-        [ span [] [ text "Mode: " ]
-        , span [] [ text (Debug.toString model.mode) ]
-        ]
-
     ]
-
-
-{--
-type alias Model =
-  { name : String
-  , players : List Player
-  }
-
-type alias Player =
-  { id : Int
-  , name : String
-  }
-
-init : Model
-init =
-  { name = ""
-  , players = [ { name = "John Smith"
-                , id = 0
-                }
-              , { name = "John Doe"
-                , id = 1
-                }
-              ]
-  }
-
-add : String -> Model -> Model
-add newName model =
-  let
-      newPlayer =
-        Player (List.length model.players) newName
-
-      allPlayers =
-        newPlayer :: model.players
-
-      isNameDuplicate =
-        init.players
-        |> List.map .name
-        |> List.member newName
-  in
-      case isNameDuplicate of
-        True ->
-          model
-        False ->
-          { model | players = allPlayers
-                  , name = ""
-          }
-
-edit : Model -> List Player
-edit model =
-  model.players
-  |> List.map (\editPlayer ->
-    case ( editPlayer.name == model.name ) of
-      True ->
-        setPlayerName model.name editPlayer
-      False ->
-        editPlayer
-  )
-
-setPlayerName : String -> Player -> Player
-setPlayerName newName playerRecord =
-  { playerRecord | name  = newName }
---}
-
-
-
-
-
 

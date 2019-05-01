@@ -22,6 +22,7 @@ main =
 type alias Model =
   { name : String
   , players : List Player
+  , id : Maybe Int
   }
 
 type alias Player =
@@ -33,6 +34,7 @@ init : Model
 init =
   { name = ""
   , players = []
+  , id = Nothing
   }
 
 
@@ -40,47 +42,81 @@ init =
 -- Update
 
 type Msg
-  = Save
-  | Clear
-  | Input String
+  = Input String
+  | ClearButton
+  | SaveButton
+  | EditButton String Int
+  | DeleteButton String
 
 update : Msg -> Model -> Model
 update msg model =
   case msg of
-    Clear ->
-      { model | name = "" }
+
+    ClearButton ->
+      { model | name = ""
+              , id = Nothing
+      }
+
     Input name ->
-      { model | name = name }
-    Save ->
+      { model | name = name
+      }
+
+    SaveButton ->
       case (String.isEmpty model.name) of
+
         True ->
-          model
+          { model | name = ""
+          }
+
         False ->
           save model
 
-save : Model -> Model
+    EditButton playerName playerId->
+      { model | name = playerName
+              , id =  Just playerId
+      }
+
+    DeleteButton deletePlayerName ->
+      delete model deletePlayerName
+
 save model =
+  case model.id of
+    Just playerId ->
+      edit model playerId
+    Nothing ->
+      add model
+
+add model =
   let
       newPlayer =
         Player (List.length model.players) model.name
 
       allPlayers =
         newPlayer :: model.players
-
-      isNameDuplicate =
-        model.players
-        |> List.map .name
-        |> List.member model.name
   in
-      case isNameDuplicate of
-        True ->
-          { model | name = "" }
-        False ->
-          { model | players = allPlayers
-                  , name = ""
-          }
+      { model | players = allPlayers
+              , name = ""
+              , id = Nothing
+      }
 
-edit : Int -> String -> List Player
+edit model value =
+  let
+      result =
+        model.players
+        |> List.map (\content ->
+            if content.id == value then
+              { content | name = model.name
+              }
+            else
+              content
+          )
+  in
+      { model | players = result
+              , id = Nothing
+              , name = ""
+      }
+
+{--
 edit playerId newName =
   List.map (\editPlayer ->
     case ( editPlayer.id == playerId ) of
@@ -90,10 +126,20 @@ edit playerId newName =
         editPlayer
     ) init.players
 
-setPlayerName : String -> Player -> Player
 setPlayerName newName playerRecord =
   { playerRecord | name  = newName }
+--}
 
+delete model deletePlayerName =
+  let
+      result =
+        model.players
+        |> List.filter (\deleteplayer -> deleteplayer.name /= deletePlayerName)
+  in
+      { model | players = result
+              , name = ""
+              , id = Nothing
+      }
 
 
 -- View
@@ -119,16 +165,25 @@ playerSection model =
 player : Player -> Html Msg
 player playerModel =
   li []
-    [ i [ class "far fa-trash-alt" ] []
-    , i [ class "far fa-edit" ]
+    [ i [ class "far fa-trash-alt"
+        , onClick (DeleteButton playerModel.name)
+        ]
         []
-    , span [ class "player-name", onClick Edit ] [text (playerModel.name) ]
-    , span [] [ text "score here" ]
+    , i [ class "far fa-edit"
+        , onClick (EditButton playerModel.name playerModel.id)
+        ]
+        []
+    , span [ class "player-name"
+            , onClick (EditButton playerModel.name playerModel.id)
+            ]
+        [text (playerModel.name) ]
+    , span []
+        [ text "score here" ]
     ]
 
 playerInput : Model -> Html Msg
 playerInput model =
-  Html.form [ onSubmit Save ]
+  Html.form [ onSubmit SaveButton ]
     [ input [ type_ "text"
             , onInput Input
             , placeholder "Enter Player..."
@@ -137,16 +192,24 @@ playerInput model =
         []
     , button [ type_ "submit" ]
         [ text "Save" ]
-    , button [ type_ "button" , onClick Clear ]
+    , button [ type_ "button" , onClick ClearButton ]
         [ text "Cancel" ]
     ]
 
 debugSection : Model -> Html Msg
 debugSection model =
   div []
-    [ h3 [] [ text "Name" ]
-    , h3 [] [ text (Debug.toString model.name) ]
-    , h3 [] [ text "Players" ]
-    , h3 [] [ text (Debug.toString model.players) ]
+    [ h3 []
+        [ text "Name: "
+        , text (Debug.toString model.name)
+        ]
+    , h3 []
+        [ text "Players: "
+        , text (Debug.toString model.players)
+        ]
+    , h3 []
+        [ text "Id: "
+        , text (Debug.toString model.id)
+        ]
     ]
 

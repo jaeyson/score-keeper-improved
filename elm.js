@@ -4310,6 +4310,7 @@ function _Browser_load(url)
 		}
 	}));
 }
+var elm$core$Maybe$Nothing = {$: 'Nothing'};
 var elm$core$Basics$EQ = {$: 'EQ'};
 var elm$core$Basics$LT = {$: 'LT'};
 var elm$core$Elm$JsArray$foldr = _JsArray_foldr;
@@ -4390,16 +4391,14 @@ var elm$core$Set$toList = function (_n0) {
 	var dict = _n0.a;
 	return elm$core$Dict$keys(dict);
 };
-var author$project$Main$init = {name: '', players: _List_Nil};
-var author$project$Main$Player = F2(
-	function (id, name) {
-		return {id: id, name: name};
-	});
+var author$project$Main$init = {id: elm$core$Maybe$Nothing, name: '', players: _List_Nil};
 var elm$core$Basics$apR = F2(
 	function (x, f) {
 		return f(x);
 	});
+var elm$core$Basics$neq = _Utils_notEqual;
 var elm$core$Basics$add = _Basics_add;
+var elm$core$Basics$gt = _Utils_gt;
 var elm$core$List$foldl = F3(
 	function (func, acc, list) {
 		foldl:
@@ -4419,17 +4418,6 @@ var elm$core$List$foldl = F3(
 			}
 		}
 	});
-var elm$core$List$length = function (xs) {
-	return A3(
-		elm$core$List$foldl,
-		F2(
-			function (_n0, i) {
-				return i + 1;
-			}),
-		0,
-		xs);
-};
-var elm$core$Basics$gt = _Utils_gt;
 var elm$core$List$reverse = function (list) {
 	return A3(elm$core$List$foldl, elm$core$List$cons, _List_Nil, list);
 };
@@ -4488,6 +4476,54 @@ var elm$core$List$foldr = F3(
 	function (fn, acc, ls) {
 		return A4(elm$core$List$foldrHelper, fn, acc, 0, ls);
 	});
+var elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2(elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var author$project$Main$delete = F2(
+	function (model, deletePlayerName) {
+		var result = A2(
+			elm$core$List$filter,
+			function (deleteplayer) {
+				return !_Utils_eq(deleteplayer.name, deletePlayerName);
+			},
+			model.players);
+		return _Utils_update(
+			model,
+			{id: elm$core$Maybe$Nothing, name: '', players: result});
+	});
+var author$project$Main$Player = F2(
+	function (id, name) {
+		return {id: id, name: name};
+	});
+var elm$core$List$length = function (xs) {
+	return A3(
+		elm$core$List$foldl,
+		F2(
+			function (_n0, i) {
+				return i + 1;
+			}),
+		0,
+		xs);
+};
+var author$project$Main$add = function (model) {
+	var newPlayer = A2(
+		author$project$Main$Player,
+		elm$core$List$length(model.players),
+		model.name);
+	var allPlayers = A2(elm$core$List$cons, newPlayer, model.players);
+	return _Utils_update(
+		model,
+		{id: elm$core$Maybe$Nothing, name: '', players: allPlayers});
+};
+var elm$core$Basics$eq = _Utils_equal;
 var elm$core$List$map = F2(
 	function (f, xs) {
 		return A3(
@@ -4502,63 +4538,31 @@ var elm$core$List$map = F2(
 			_List_Nil,
 			xs);
 	});
-var elm$core$Basics$eq = _Utils_equal;
-var elm$core$Basics$False = {$: 'False'};
-var elm$core$Basics$True = {$: 'True'};
-var elm$core$List$any = F2(
-	function (isOkay, list) {
-		any:
-		while (true) {
-			if (!list.b) {
-				return false;
-			} else {
-				var x = list.a;
-				var xs = list.b;
-				if (isOkay(x)) {
-					return true;
-				} else {
-					var $temp$isOkay = isOkay,
-						$temp$list = xs;
-					isOkay = $temp$isOkay;
-					list = $temp$list;
-					continue any;
-				}
-			}
-		}
-	});
-var elm$core$List$member = F2(
-	function (x, xs) {
-		return A2(
-			elm$core$List$any,
-			function (a) {
-				return _Utils_eq(a, x);
+var author$project$Main$edit = F2(
+	function (model, value) {
+		var result = A2(
+			elm$core$List$map,
+			function (content) {
+				return _Utils_eq(content.id, value) ? _Utils_update(
+					content,
+					{name: model.name}) : content;
 			},
-			xs);
+			model.players);
+		return _Utils_update(
+			model,
+			{id: elm$core$Maybe$Nothing, name: '', players: result});
 	});
 var author$project$Main$save = function (model) {
-	var newPlayer = A2(
-		author$project$Main$Player,
-		elm$core$List$length(model.players),
-		model.name);
-	var isNameDuplicate = A2(
-		elm$core$List$member,
-		model.name,
-		A2(
-			elm$core$List$map,
-			function ($) {
-				return $.name;
-			},
-			model.players));
-	var allPlayers = A2(elm$core$List$cons, newPlayer, model.players);
-	if (isNameDuplicate) {
-		return _Utils_update(
-			model,
-			{name: ''});
+	var _n0 = model.id;
+	if (_n0.$ === 'Just') {
+		var playerId = _n0.a;
+		return A2(author$project$Main$edit, model, playerId);
 	} else {
-		return _Utils_update(
-			model,
-			{name: '', players: allPlayers});
+		return author$project$Main$add(model);
 	}
+};
+var elm$core$Maybe$Just = function (a) {
+	return {$: 'Just', a: a};
 };
 var elm$core$String$isEmpty = function (string) {
 	return string === '';
@@ -4566,28 +4570,44 @@ var elm$core$String$isEmpty = function (string) {
 var author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
-			case 'Clear':
+			case 'ClearButton':
 				return _Utils_update(
 					model,
-					{name: ''});
+					{id: elm$core$Maybe$Nothing, name: ''});
 			case 'Input':
 				var name = msg.a;
 				return _Utils_update(
 					model,
 					{name: name});
-			default:
+			case 'SaveButton':
 				var _n1 = elm$core$String$isEmpty(model.name);
 				if (_n1) {
-					return model;
+					return _Utils_update(
+						model,
+						{name: ''});
 				} else {
 					return author$project$Main$save(model);
 				}
+			case 'EditButton':
+				var playerName = msg.a;
+				var playerId = msg.b;
+				return _Utils_update(
+					model,
+					{
+						id: elm$core$Maybe$Just(playerId),
+						name: playerName
+					});
+			default:
+				var deletePlayerName = msg.a;
+				return A2(author$project$Main$delete, model, deletePlayerName);
 		}
 	});
 var elm$core$Debug$toString = _Debug_toString;
 var elm$core$Basics$identity = function (x) {
 	return x;
 };
+var elm$core$Basics$False = {$: 'False'};
+var elm$core$Basics$True = {$: 'True'};
 var elm$core$Result$isOk = function (result) {
 	if (result.$ === 'Ok') {
 		return true;
@@ -4737,10 +4757,6 @@ var elm$core$Array$initialize = F2(
 			return A5(elm$core$Array$initializeHelp, fn, initialFromIndex, len, _List_Nil, tail);
 		}
 	});
-var elm$core$Maybe$Just = function (a) {
-	return {$: 'Just', a: a};
-};
-var elm$core$Maybe$Nothing = {$: 'Nothing'};
 var elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -4972,13 +4988,7 @@ var author$project$Main$debugSection = function (model) {
 				_List_Nil,
 				_List_fromArray(
 					[
-						elm$html$Html$text('Name')
-					])),
-				A2(
-				elm$html$Html$h3,
-				_List_Nil,
-				_List_fromArray(
-					[
+						elm$html$Html$text('Name: '),
 						elm$html$Html$text(
 						elm$core$Debug$toString(model.name))
 					])),
@@ -4987,23 +4997,26 @@ var author$project$Main$debugSection = function (model) {
 				_List_Nil,
 				_List_fromArray(
 					[
-						elm$html$Html$text('Players')
+						elm$html$Html$text('Players: '),
+						elm$html$Html$text(
+						elm$core$Debug$toString(model.players))
 					])),
 				A2(
 				elm$html$Html$h3,
 				_List_Nil,
 				_List_fromArray(
 					[
+						elm$html$Html$text('Id: '),
 						elm$html$Html$text(
-						elm$core$Debug$toString(model.players))
+						elm$core$Debug$toString(model.id))
 					]))
 			]));
 };
-var author$project$Main$Clear = {$: 'Clear'};
+var author$project$Main$ClearButton = {$: 'ClearButton'};
 var author$project$Main$Input = function (a) {
 	return {$: 'Input', a: a};
 };
-var author$project$Main$Save = {$: 'Save'};
+var author$project$Main$SaveButton = {$: 'SaveButton'};
 var elm$html$Html$button = _VirtualDom_node('button');
 var elm$html$Html$form = _VirtualDom_node('form');
 var elm$html$Html$input = _VirtualDom_node('input');
@@ -5095,7 +5108,7 @@ var author$project$Main$playerInput = function (model) {
 		elm$html$Html$form,
 		_List_fromArray(
 			[
-				elm$html$Html$Events$onSubmit(author$project$Main$Save)
+				elm$html$Html$Events$onSubmit(author$project$Main$SaveButton)
 			]),
 		_List_fromArray(
 			[
@@ -5124,7 +5137,7 @@ var author$project$Main$playerInput = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$Attributes$type_('button'),
-						elm$html$Html$Events$onClick(author$project$Main$Clear)
+						elm$html$Html$Events$onClick(author$project$Main$ClearButton)
 					]),
 				_List_fromArray(
 					[
@@ -5132,6 +5145,13 @@ var author$project$Main$playerInput = function (model) {
 					]))
 			]));
 };
+var author$project$Main$DeleteButton = function (a) {
+	return {$: 'DeleteButton', a: a};
+};
+var author$project$Main$EditButton = F2(
+	function (a, b) {
+		return {$: 'EditButton', a: a, b: b};
+	});
 var elm$html$Html$i = _VirtualDom_node('i');
 var elm$html$Html$li = _VirtualDom_node('li');
 var elm$html$Html$span = _VirtualDom_node('span');
@@ -5146,21 +5166,27 @@ var author$project$Main$player = function (playerModel) {
 				elm$html$Html$i,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('far fa-trash-alt')
+						elm$html$Html$Attributes$class('far fa-trash-alt'),
+						elm$html$Html$Events$onClick(
+						author$project$Main$DeleteButton(playerModel.name))
 					]),
 				_List_Nil),
 				A2(
 				elm$html$Html$i,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('far fa-edit')
+						elm$html$Html$Attributes$class('far fa-edit'),
+						elm$html$Html$Events$onClick(
+						A2(author$project$Main$EditButton, playerModel.name, playerModel.id))
 					]),
 				_List_Nil),
 				A2(
 				elm$html$Html$span,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('player-name')
+						elm$html$Html$Attributes$class('player-name'),
+						elm$html$Html$Events$onClick(
+						A2(author$project$Main$EditButton, playerModel.name, playerModel.id))
 					]),
 				_List_fromArray(
 					[

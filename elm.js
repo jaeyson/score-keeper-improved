@@ -4488,11 +4488,45 @@ var elm$core$List$filter = F2(
 			list);
 	});
 var author$project$Practice$delete = F2(
-	function (model, deletePlayerName) {
+	function (model, playerName) {
 		var result = A2(
 			elm$core$List$filter,
 			function (deletePlayer) {
-				return !_Utils_eq(deletePlayer.name, deletePlayerName);
+				return !_Utils_eq(deletePlayer.name, playerName);
+			},
+			model.players);
+		return _Utils_update(
+			model,
+			{id: elm$core$Maybe$Nothing, name: '', players: result});
+	});
+var elm$core$Basics$eq = _Utils_equal;
+var elm$core$List$map = F2(
+	function (f, xs) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, acc) {
+					return A2(
+						elm$core$List$cons,
+						f(x),
+						acc);
+				}),
+			_List_Nil,
+			xs);
+	});
+var author$project$Practice$resetPlayerScore = F2(
+	function (model, playerId) {
+		var result = A2(
+			elm$core$List$map,
+			function (scorePlayer) {
+				var _n0 = _Utils_eq(scorePlayer.id, playerId);
+				if (_n0) {
+					return _Utils_update(
+						scorePlayer,
+						{totalPointsScored: 0});
+				} else {
+					return scorePlayer;
+				}
 			},
 			model.players);
 		return _Utils_update(
@@ -4530,21 +4564,6 @@ var author$project$Practice$setPlayerName = F2(
 			model,
 			{name: newName});
 	});
-var elm$core$Basics$eq = _Utils_equal;
-var elm$core$List$map = F2(
-	function (f, xs) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, acc) {
-					return A2(
-						elm$core$List$cons,
-						f(x),
-						acc);
-				}),
-			_List_Nil,
-			xs);
-	});
 var author$project$Practice$edit = F2(
 	function (model, value) {
 		var result = A2(
@@ -4571,20 +4590,20 @@ var author$project$Practice$save = function (model) {
 		return author$project$Practice$add(model);
 	}
 };
-var author$project$Practice$setPlayerScore = F2(
+var author$project$Practice$addPlayerScore = F2(
 	function (model, points) {
 		return _Utils_update(
 			model,
 			{totalPointsScored: model.totalPointsScored + points});
 	});
 var author$project$Practice$score = F3(
-	function (model, points, scorePlayerId) {
+	function (model, points, playerId) {
 		var result = A2(
 			elm$core$List$map,
 			function (scorePlayer) {
-				var _n0 = _Utils_eq(scorePlayer.id, scorePlayerId);
+				var _n0 = _Utils_eq(scorePlayer.id, playerId);
 				if (_n0) {
-					return A2(author$project$Practice$setPlayerScore, scorePlayer, points);
+					return A2(author$project$Practice$addPlayerScore, scorePlayer, points);
 				} else {
 					return scorePlayer;
 				}
@@ -4631,12 +4650,15 @@ var author$project$Practice$update = F2(
 						name: playerName
 					});
 			case 'DeletePlayer':
-				var deletePlayerName = msg.a;
-				return A2(author$project$Practice$delete, model, deletePlayerName);
-			default:
+				var playerName = msg.a;
+				return A2(author$project$Practice$delete, model, playerName);
+			case 'ScoreButton':
 				var points = msg.a;
 				var playerId = msg.b;
 				return A3(author$project$Practice$score, model, points, playerId);
+			default:
+				var playerId = msg.a;
+				return A2(author$project$Practice$resetPlayerScore, model, playerId);
 		}
 	});
 var elm$core$Debug$toString = _Debug_toString;
@@ -5065,6 +5087,7 @@ var elm$html$Html$Attributes$stringProperty = F2(
 			key,
 			elm$json$Json$Encode$string(string));
 	});
+var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
 var elm$html$Html$Attributes$placeholder = elm$html$Html$Attributes$stringProperty('placeholder');
 var elm$html$Html$Attributes$type_ = elm$html$Html$Attributes$stringProperty('type');
 var elm$html$Html$Attributes$value = elm$html$Html$Attributes$stringProperty('value');
@@ -5140,7 +5163,7 @@ var elm$html$Html$Events$onSubmit = function (msg) {
 			elm$html$Html$Events$alwaysPreventDefault,
 			elm$json$Json$Decode$succeed(msg)));
 };
-var author$project$Practice$playerInput = function (model) {
+var author$project$Practice$playerInputLeft = function (model) {
 	return A2(
 		elm$html$Html$form,
 		_List_fromArray(
@@ -5174,6 +5197,50 @@ var author$project$Practice$playerInput = function (model) {
 				_List_fromArray(
 					[
 						elm$html$Html$Attributes$type_('button'),
+						elm$html$Html$Attributes$class('button-cancel'),
+						elm$html$Html$Events$onClick(author$project$Practice$ClearButton)
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('Cancel')
+					]))
+			]));
+};
+var author$project$Practice$playerInputRight = function (model) {
+	return A2(
+		elm$html$Html$form,
+		_List_fromArray(
+			[
+				elm$html$Html$Events$onSubmit(author$project$Practice$SaveButton)
+			]),
+		_List_fromArray(
+			[
+				A2(
+				elm$html$Html$input,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$type_('text'),
+						elm$html$Html$Events$onInput(author$project$Practice$Input),
+						elm$html$Html$Attributes$placeholder('Enter Player...'),
+						elm$html$Html$Attributes$value(model.name)
+					]),
+				_List_Nil),
+				A2(
+				elm$html$Html$button,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$type_('submit')
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text('Save')
+					])),
+				A2(
+				elm$html$Html$button,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$type_('button'),
+						elm$html$Html$Attributes$class('button-cancel'),
 						elm$html$Html$Events$onClick(author$project$Practice$ClearButton)
 					]),
 				_List_fromArray(
@@ -5189,15 +5256,20 @@ var author$project$Practice$EditPlayer = F2(
 	function (a, b) {
 		return {$: 'EditPlayer', a: a, b: b};
 	});
+var author$project$Practice$ResetPlayerScore = function (a) {
+	return {$: 'ResetPlayerScore', a: a};
+};
 var author$project$Practice$ScoreButton = F2(
 	function (a, b) {
 		return {$: 'ScoreButton', a: a, b: b};
 	});
+var elm$core$Basics$negate = function (n) {
+	return -n;
+};
 var elm$html$Html$i = _VirtualDom_node('i');
 var elm$html$Html$li = _VirtualDom_node('li');
 var elm$html$Html$span = _VirtualDom_node('span');
-var elm$html$Html$Attributes$class = elm$html$Html$Attributes$stringProperty('className');
-var author$project$Practice$player = function (playerModel) {
+var author$project$Practice$playerLeft = function (playerModel) {
 	return A2(
 		elm$html$Html$li,
 		_List_Nil,
@@ -5207,7 +5279,7 @@ var author$project$Practice$player = function (playerModel) {
 				elm$html$Html$i,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('far fa-trash-alt'),
+						elm$html$Html$Attributes$class('fa fa-trash-alt'),
 						elm$html$Html$Events$onClick(
 						author$project$Practice$DeletePlayer(playerModel.name))
 					]),
@@ -5216,7 +5288,7 @@ var author$project$Practice$player = function (playerModel) {
 				elm$html$Html$i,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('far fa-edit'),
+						elm$html$Html$Attributes$class('fa fa-edit'),
 						elm$html$Html$Events$onClick(
 						A2(author$project$Practice$EditPlayer, playerModel.name, playerModel.id))
 					]),
@@ -5235,14 +5307,29 @@ var author$project$Practice$player = function (playerModel) {
 					])),
 				A2(
 				elm$html$Html$span,
-				_List_Nil,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('points-group')
+					]),
 				_List_fromArray(
 					[
 						A2(
-						elm$html$Html$span,
+						elm$html$Html$button,
 						_List_fromArray(
 							[
-								elm$html$Html$Attributes$class('points-button'),
+								elm$html$Html$Attributes$type_('button'),
+								elm$html$Html$Events$onClick(
+								A2(author$project$Practice$ScoreButton, -1, playerModel.id))
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('-')
+							])),
+						A2(
+						elm$html$Html$button,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$type_('button'),
 								elm$html$Html$Events$onClick(
 								A2(author$project$Practice$ScoreButton, 1, playerModel.id))
 							]),
@@ -5251,10 +5338,10 @@ var author$project$Practice$player = function (playerModel) {
 								elm$html$Html$text('1')
 							])),
 						A2(
-						elm$html$Html$span,
+						elm$html$Html$button,
 						_List_fromArray(
 							[
-								elm$html$Html$Attributes$class('points-button'),
+								elm$html$Html$Attributes$type_('button'),
 								elm$html$Html$Events$onClick(
 								A2(author$project$Practice$ScoreButton, 2, playerModel.id))
 							]),
@@ -5263,16 +5350,28 @@ var author$project$Practice$player = function (playerModel) {
 								elm$html$Html$text('2')
 							])),
 						A2(
-						elm$html$Html$span,
+						elm$html$Html$button,
 						_List_fromArray(
 							[
-								elm$html$Html$Attributes$class('points-button'),
+								elm$html$Html$Attributes$type_('button'),
 								elm$html$Html$Events$onClick(
 								A2(author$project$Practice$ScoreButton, 3, playerModel.id))
 							]),
 						_List_fromArray(
 							[
 								elm$html$Html$text('3')
+							])),
+						A2(
+						elm$html$Html$button,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$type_('button'),
+								elm$html$Html$Events$onClick(
+								author$project$Practice$ResetPlayerScore(playerModel.id))
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('R')
 							]))
 					])),
 				A2(
@@ -5289,64 +5388,237 @@ var author$project$Practice$player = function (playerModel) {
 			]));
 };
 var elm$html$Html$ul = _VirtualDom_node('ul');
-var author$project$Practice$playerSection = function (model) {
+var author$project$Practice$playerSectionLeft = function (model) {
 	return A2(
 		elm$html$Html$ul,
 		_List_Nil,
-		A2(elm$core$List$map, author$project$Practice$player, model.players));
+		A2(elm$core$List$map, author$project$Practice$playerLeft, model.players));
+};
+var author$project$Practice$playerRight = function (playerModel) {
+	return A2(
+		elm$html$Html$li,
+		_List_Nil,
+		_List_fromArray(
+			[
+				A2(
+				elm$html$Html$i,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('fa fa-trash-alt'),
+						elm$html$Html$Events$onClick(
+						author$project$Practice$DeletePlayer(playerModel.name))
+					]),
+				_List_Nil),
+				A2(
+				elm$html$Html$i,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('fa fa-edit'),
+						elm$html$Html$Events$onClick(
+						A2(author$project$Practice$EditPlayer, playerModel.name, playerModel.id))
+					]),
+				_List_Nil),
+				A2(
+				elm$html$Html$span,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('player-name'),
+						elm$html$Html$Events$onClick(
+						A2(author$project$Practice$EditPlayer, playerModel.name, playerModel.id))
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text(playerModel.name)
+					])),
+				A2(
+				elm$html$Html$span,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('points-group')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						elm$html$Html$button,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$type_('button'),
+								elm$html$Html$Events$onClick(
+								A2(author$project$Practice$ScoreButton, -1, playerModel.id))
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('-')
+							])),
+						A2(
+						elm$html$Html$button,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$type_('button'),
+								elm$html$Html$Events$onClick(
+								A2(author$project$Practice$ScoreButton, 1, playerModel.id))
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('1')
+							])),
+						A2(
+						elm$html$Html$button,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$type_('button'),
+								elm$html$Html$Events$onClick(
+								A2(author$project$Practice$ScoreButton, 2, playerModel.id))
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('2')
+							])),
+						A2(
+						elm$html$Html$button,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$type_('button'),
+								elm$html$Html$Events$onClick(
+								A2(author$project$Practice$ScoreButton, 3, playerModel.id))
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('3')
+							])),
+						A2(
+						elm$html$Html$button,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$type_('button'),
+								elm$html$Html$Events$onClick(
+								author$project$Practice$ResetPlayerScore(playerModel.id))
+							]),
+						_List_fromArray(
+							[
+								elm$html$Html$text('R')
+							]))
+					])),
+				A2(
+				elm$html$Html$span,
+				_List_fromArray(
+					[
+						elm$html$Html$Attributes$class('player-score')
+					]),
+				_List_fromArray(
+					[
+						elm$html$Html$text(
+						elm$core$String$fromInt(playerModel.totalPointsScored))
+					]))
+			]));
+};
+var author$project$Practice$playerSectionRight = function (model) {
+	return A2(
+		elm$html$Html$ul,
+		_List_Nil,
+		A2(elm$core$List$map, author$project$Practice$playerRight, model.players));
 };
 var author$project$Practice$view = function (model) {
 	return A2(
 		elm$html$Html$div,
-		_List_fromArray(
-			[
-				elm$html$Html$Attributes$class('row')
-			]),
+		_List_Nil,
 		_List_fromArray(
 			[
 				A2(
 				elm$html$Html$div,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('col')
+						elm$html$Html$Attributes$class('row')
 					]),
 				_List_fromArray(
 					[
 						A2(
-						elm$html$Html$h3,
+						elm$html$Html$div,
 						_List_fromArray(
 							[
-								elm$html$Html$Attributes$class('header-player')
+								elm$html$Html$Attributes$class('col')
 							]),
 						_List_fromArray(
 							[
 								A2(
-								elm$html$Html$span,
-								_List_Nil,
+								elm$html$Html$h3,
 								_List_fromArray(
 									[
-										elm$html$Html$text('Name')
+										elm$html$Html$Attributes$class('header-player')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										elm$html$Html$span,
+										_List_Nil,
+										_List_fromArray(
+											[
+												elm$html$Html$text('Name')
+											])),
+										A2(
+										elm$html$Html$span,
+										_List_Nil,
+										_List_fromArray(
+											[
+												elm$html$Html$text('Points')
+											]))
 									])),
+								author$project$Practice$playerSectionLeft(model),
+								author$project$Practice$playerInputLeft(model)
+							])),
+						A2(
+						elm$html$Html$div,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('col')
+							]),
+						_List_fromArray(
+							[
 								A2(
-								elm$html$Html$span,
-								_List_Nil,
+								elm$html$Html$h3,
 								_List_fromArray(
 									[
-										elm$html$Html$text('Points')
-									]))
-							])),
-						author$project$Practice$playerSection(model),
-						author$project$Practice$playerInput(model)
+										elm$html$Html$Attributes$class('header-player')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										elm$html$Html$span,
+										_List_Nil,
+										_List_fromArray(
+											[
+												elm$html$Html$text('Name')
+											])),
+										A2(
+										elm$html$Html$span,
+										_List_Nil,
+										_List_fromArray(
+											[
+												elm$html$Html$text('Points')
+											]))
+									])),
+								author$project$Practice$playerSectionRight(model),
+								author$project$Practice$playerInputRight(model)
+							]))
 					])),
 				A2(
 				elm$html$Html$div,
 				_List_fromArray(
 					[
-						elm$html$Html$Attributes$class('col')
+						elm$html$Html$Attributes$class('row')
 					]),
 				_List_fromArray(
 					[
-						author$project$Practice$debugSection(model)
+						A2(
+						elm$html$Html$div,
+						_List_fromArray(
+							[
+								elm$html$Html$Attributes$class('col')
+							]),
+						_List_fromArray(
+							[
+								author$project$Practice$debugSection(model)
+							]))
 					]))
 			]));
 };

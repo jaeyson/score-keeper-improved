@@ -23,16 +23,16 @@ type alias Model =
   { name : String
   , players : List Player
   , id : Maybe Int
-  , score : List ScoreHistory
+  , score : List Score
   }
 
-type alias Player =
+type alias Player=
   { id : Int
   , name : String
   , totalPointsScored : Int
   }
 
-type alias ScoreHistory =
+type alias Score=
   { name : String
   , points : Int
   }
@@ -56,6 +56,7 @@ type Msg
   | EditPlayer String Int
   | DeletePlayer String
   | ScoreButton Int Int
+  | ResetPlayerScore Int
 
 update : Msg -> Model -> Model
 update msg model =
@@ -84,11 +85,14 @@ update msg model =
               , id =  Just playerId
       }
 
-    DeletePlayer deletePlayerName ->
-      delete model deletePlayerName
+    DeletePlayer playerName ->
+      delete model playerName
 
     ScoreButton points playerId ->
       score model points playerId
+
+    ResetPlayerScore playerId ->
+      resetPlayerScore model playerId
 
 save model =
   case model.id of
@@ -148,25 +152,25 @@ setPlayerName model newName =
   }
 
 delete : Model -> String -> Model
-delete model deletePlayerName =
+delete model playerName =
   let
       result =
         model.players
-        |> List.filter (\deletePlayer -> deletePlayer.name /= deletePlayerName)
+        |> List.filter (\deletePlayer -> deletePlayer.name /= playerName)
   in
       { model | players = result
               , name = ""
               , id = Nothing
       }
 
-score model points scorePlayerId =
+score model points playerId =
   let
       result =
         model.players
         |> List.map (\scorePlayer ->
-            case (scorePlayer.id == scorePlayerId) of
+            case (scorePlayer.id == playerId) of
               True ->
-                setPlayerScore scorePlayer points
+                addPlayerScore scorePlayer points
               False ->
                 scorePlayer
           )
@@ -177,9 +181,26 @@ score model points scorePlayerId =
       }
 
 -- Helper Function
-setPlayerScore model points =
+addPlayerScore model points =
   { model | totalPointsScored = model.totalPointsScored + points
   }
+
+resetPlayerScore model playerId =
+  let
+      result =
+        model.players
+        |> List.map (\scorePlayer ->
+            case (scorePlayer.id == playerId) of
+              True ->
+                { scorePlayer | totalPointsScored = 0 }
+              False ->
+                scorePlayer
+          )
+  in
+      { model | players = result
+              , name = ""
+              , id = Nothing
+      }
 
   {--
   let
@@ -202,17 +223,37 @@ setPlayerScore model points =
 
 view : Model -> Html Msg
 view model =
-  div [ class "row" ]
-    [ div [ class "col" ]
-        [ h3 [ class "header-player" ]
-            [ span [] [ text "Name" ]
-            , span [] [ text "Points" ]
+  div []
+    [ div [ class "row" ]
+        [ div [ class "col" ]
+            [ div [ class "header-score" ]
+                [ h1 [] [ text "Home" ]
+                , h2 [] [ text "Score" ]
+                ]
+            , h3 [ class "header-player" ]
+                [ span [] [ text "Name" ]
+                , span [] [ text "Points" ]
+                ]
+            , playerSection model
             ]
-        , playerSection model
-        , playerInput model
+        , div [ class "col" ]
+            [ div [ class "header-score" ]
+                [ h1 [] [ text "Away" ]
+                , h2 [] [ text "Score" ]
+                ]
+            , h3 [ class "header-player" ]
+                [ span [] [ text "Name" ]
+                , span [] [ text "Points" ]
+                ]
+            , playerSection model
+            ]
         ]
-    , div [ class "col" ]
-        [ debugSection model ]
+    , div [ class "row" ]
+        [ div [ class "col" ]
+            [ playerInput model
+            , debugSection model
+            ]
+        ]
     ]
 
 playerSection : Model -> Html Msg
@@ -224,11 +265,11 @@ playerSection model =
 player : Player -> Html Msg
 player playerModel =
   li []
-    [ i [ class "far fa-trash-alt"
+    [ i [ class "fa fa-trash-alt"
         , onClick (DeletePlayer playerModel.name)
         ]
         []
-    , i [ class "far fa-edit"
+    , i [ class "fa fa-edit"
         , onClick (EditPlayer playerModel.name playerModel.id)
         ]
         []
@@ -236,19 +277,27 @@ player playerModel =
             , onClick (EditPlayer playerModel.name playerModel.id)
             ]
         [text (playerModel.name) ]
-    , span []
-        [ span [ class "points-button"
-                , onClick (ScoreButton 1 playerModel.id)
-                ]
+    , span [ class "points-group" ]
+        [ button [ type_ "button"
+                  , onClick (ScoreButton -1 playerModel.id)
+                  ]
+            [ text "-" ]
+        , button [ type_ "button"
+                  , onClick (ScoreButton 1 playerModel.id)
+                  ]
             [ text "1" ]
-        , span [ class "points-button"
-                , onClick (ScoreButton 2 playerModel.id)
-                ]
+        , button [ type_ "button"
+                  , onClick (ScoreButton 2 playerModel.id)
+                  ]
             [ text "2" ]
-        , span [ class "points-button"
-                , onClick (ScoreButton 3 playerModel.id)
-                ]
+        , button [ type_ "button"
+                  , onClick (ScoreButton 3 playerModel.id)
+                  ]
             [ text "3" ]
+        , button [ type_ "button"
+                  , onClick (ResetPlayerScore playerModel.id)
+                  ]
+            [ text "R" ]
         ]
     , span [ class "player-score" ]
         [ text (String.fromInt playerModel.totalPointsScored) ]
@@ -265,7 +314,9 @@ playerInput model =
         []
     , button [ type_ "submit" ]
         [ text "Save" ]
-    , button [ type_ "button" , onClick ClearButton ]
+    , button [ type_ "button"
+              , class "button-cancel"
+              , onClick ClearButton ]
         [ text "Cancel" ]
     ]
 

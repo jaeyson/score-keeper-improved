@@ -256,14 +256,20 @@ view model =
         ]
     ]
 
-playerSection : Model -> Html Msg
-playerSection model =
+playerSectionLeft : Model -> Html Msg
+playerSectionLeft model =
   model.players
-  |> List.map player
+  |> List.map playerLeft
   |> ul []
 
-player : Player -> Html Msg
-player playerModel =
+playerSectionRight : Model -> Html Msg
+playerSectionRight model =
+  model.players
+  |> List.map playerRight
+  |> ul []
+
+playerLeft : Player -> Html Msg
+playerLeft playerModel =
   li []
     [ i [ class "fa fa-trash-alt"
         , onClick (DeletePlayer playerModel.name)
@@ -303,8 +309,66 @@ player playerModel =
         [ text (String.fromInt playerModel.totalPointsScored) ]
     ]
 
-playerInput : Model -> Html Msg
-playerInput model =
+playerRight : Player -> Html Msg
+playerRight playerModel =
+  li []
+    [ i [ class "fa fa-trash-alt"
+        , onClick (DeletePlayer playerModel.name)
+        ]
+        []
+    , i [ class "fa fa-edit"
+        , onClick (EditPlayer playerModel.name playerModel.id)
+        ]
+        []
+    , span [ class "player-name"
+            , onClick (EditPlayer playerModel.name playerModel.id)
+            ]
+        [text (playerModel.name) ]
+    , span [ class "points-group" ]
+        [ button [ type_ "button"
+                  , onClick (ScoreButton -1 playerModel.id)
+                  ]
+            [ text "-" ]
+        , button [ type_ "button"
+                  , onClick (ScoreButton 1 playerModel.id)
+                  ]
+            [ text "1" ]
+        , button [ type_ "button"
+                  , onClick (ScoreButton 2 playerModel.id)
+                  ]
+            [ text "2" ]
+        , button [ type_ "button"
+                  , onClick (ScoreButton 3 playerModel.id)
+                  ]
+            [ text "3" ]
+        , button [ type_ "button"
+                  , onClick (ResetPlayerScore playerModel.id)
+                  ]
+            [ text "R" ]
+        ]
+    , span [ class "player-score" ]
+        [ text (String.fromInt playerModel.totalPointsScored) ]
+    ]
+
+playerInputLeft : Model -> Html Msg
+playerInputLeft model =
+  Html.form [ onSubmit SaveButton ]
+    [ input [ type_ "text"
+            , onInput Input
+            , placeholder "Enter Player..."
+            , value model.name
+            ]
+        []
+    , button [ type_ "submit" ]
+        [ text "Save" ]
+    , button [ type_ "button"
+              , class "button-cancel"
+              , onClick ClearButton ]
+        [ text "Cancel" ]
+    ]
+
+playerInputRight : Model -> Html Msg
+playerInputRight model =
   Html.form [ onSubmit SaveButton ]
     [ input [ type_ "text"
             , onInput Input

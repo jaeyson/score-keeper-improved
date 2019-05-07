@@ -31,6 +31,15 @@
     flex-wrap: wrap;
     width: 100%;
   }
+  h1 {
+    font-size: 5rem;
+    margin: 0;
+    padding: 0;
+  }
+  h2 {
+    margin: 0;
+    padding: 0;
+  }
   .header-app,
   .header-score {
     text-align: center;
@@ -43,6 +52,9 @@
   }
   .header-player > span:first-child {
     padding-left: 5rem;
+  }
+  form > input[type="text"] {
+    flex: 1;
   }
   li {
     align-items: center;
@@ -99,7 +111,10 @@
   </div>
 
   <script>
-    const app = Elm.Practice.init({
+    //Elm.Practice == module Practice exposing (..)
+    //Make sure to change that every time you
+    //switch modules.
+    const app = Elm.Main.init({
       node: document.getElementById('elm')
     });
   </script>

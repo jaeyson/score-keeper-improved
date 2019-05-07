@@ -21,20 +21,35 @@ main =
 
 type alias Model =
   { name : String
-  , players : List Player
-  , id : Maybe Int
+  , playerHome : List PlayerHome
+  , playerAway : List PlayerAway
+  , scoreHome : Int
+  , scoreAway : Int
+  , id : Maybe String
+  , inputTeam : String
   }
 
-type alias Player =
-  { id : Int
-  , name : String
+type alias PlayerHome =
+  { name : String
+  , totalPointsScored : Int
+  , id : String
+  }
+
+type alias PlayerAway =
+  { name : String
+  , totalPointsScored : Int
+  , id : String
   }
 
 init : Model
 init =
   { name = ""
-  , players = []
+  , playerHome = []
+  , playerAway = []
+  , scoreHome = 0
+  , scoreAway = 0
   , id = Nothing
+  , inputTeam = ""
   }
 
 
@@ -43,10 +58,13 @@ init =
 
 type Msg
   = Input String
+  | Team String
   | ClearButton
   | SaveButton
-  | EditButton String Int
-  | DeleteButton String
+  | EditPlayer String String String
+  | DeletePlayer String
+  | ScoreButton Int String
+  | ResetPlayerScore String
 
 update : Msg -> Model -> Model
 update msg model =
@@ -61,6 +79,11 @@ update msg model =
       { model | name = name
       }
 
+    Team name ->
+      { model | inputTeam = name
+      }
+
+
     SaveButton ->
       case (String.isEmpty model.name) of
         True ->
@@ -70,13 +93,20 @@ update msg model =
         False ->
           save model
 
-    EditButton playerName playerId->
+    EditPlayer playerName playerId team ->
       { model | name = playerName
               , id =  Just playerId
+              , inputTeam = team
       }
 
-    DeleteButton deletePlayerName ->
-      delete model deletePlayerName
+    DeletePlayer playerName ->
+      delete model playerName
+
+    ScoreButton points playerId ->
+      score model points playerId
+
+    ResetPlayerScore playerId ->
+      resetPlayerScore model playerId
 
 save model =
   case model.id of
@@ -100,97 +130,331 @@ save model =
   --}
 
 add model =
+  case model.inputTeam of
+    "Home" ->
+      addHomePlayerName model model.name
+
+    "Away" ->
+      addAwayPlayerName model model.name
+
+    _ ->
+      { model | name = ""
+              , id = Nothing
+      }
+
+-- helper for add function
+addHomePlayerName model playerName =
   let
       newPlayer =
-        Player (List.length model.players) model.name
-
+        PlayerHome playerName 0 ("Home" ++ (String.fromInt (List.length model.playerHome)))
       allPlayers =
-        newPlayer :: model.players
+        newPlayer :: model.playerHome
   in
-      { model | players = allPlayers
-              , name = ""
+      { model | playerHome = allPlayers
               , id = Nothing
+              , name = ""
       }
+
+addAwayPlayerName model playerName =
+  let
+      newPlayer =
+        PlayerAway playerName 0 ("Away" ++ (String.fromInt (List.length model.playerAway)))
+      allPlayers =
+        newPlayer :: model.playerAway
+  in
+      { model | playerAway = allPlayers
+              , id = Nothing
+              , name = ""
+      }
+-- addHomePlayerName model.away "WTF???"
+
+
 
 -- edit model playerId
-edit model value =
+edit model playerId =
+  case model.inputTeam of
+    "Home" ->
+      editHomePlayerName model playerId
+
+    "Away" ->
+      editAwayPlayerName model playerId
+
+    _ ->
+      model
+
+-- helper for edit function
+editHomePlayerName model playerId =
   let
       result =
-        model.players
-        |> List.map (\content ->
-            case (content.id == value) of
+        model.playerHome
+        |> List.map (\player ->
+            case (player.id == playerId) of
               True ->
-                setPlayerName content model.name
+                { player | name = model.name
+                }
               False ->
-                content
+                player
           )
   in
-      { model | players = result
-              , name = ""
+      { model | playerHome = result
               , id = Nothing
+              , name = ""
       }
 
--- Helper Function
-setPlayerName model newName =
-  { model | name  = newName
-  }
-
-delete : Model -> String -> Model
-delete model deletePlayerName =
+editAwayPlayerName model playerId =
   let
       result =
-        model.players
-        |> List.filter (\deleteplayer -> deleteplayer.name /= deletePlayerName)
+        model.playerAway
+        |> List.map (\player ->
+            case (player.id == playerId) of
+              True ->
+                { player | name = model.name
+                }
+              False ->
+                player
+          )
   in
-      { model | players = result
-              , name = ""
+      { model | playerAway = result
               , id = Nothing
+              , name = ""
       }
 
+delete model playerName =
+  let
+      home =
+        model.playerHome
+        |> List.filter (\player -> player.name /= playerName)
+
+      away =
+        model.playerAway
+        |> List.filter (\player -> player.name /= playerName)
+  in
+      case ((List.isEmpty home), (List.isEmpty away)) of
+        (True,True) ->
+          { model | playerHome = home
+                  , playerAway = away
+                  , id = Nothing
+                  , name = ""
+          }
+        (True,False) ->
+          { model | playerHome = home
+                  , id = Nothing
+                  , name = ""
+          }
+        (False,True) ->
+          { model | playerAway = away
+                  , id = Nothing
+                  , name = ""
+          }
+        (False,False) ->
+          model
+
+score model points playerId =
+  let
+      home =
+        model.playerHome
+        |> List.map (\player ->
+            case (player.id == playerId) of
+              True ->
+                addPlayerScore player points
+              False ->
+                player
+          )
+      away =
+        model.playerAway
+        |> List.map (\player ->
+            case (player.id == playerId) of
+              True ->
+                addPlayerScore player points
+              False ->
+                player
+          )
+
+  in
+      { model | playerHome = home
+              , playerAway = away
+              , scoreHome = home |> List.map .totalPointsScored |> List.sum
+              , scoreAway = away |> List.map .totalPointsScored |> List.sum
+              , id = Nothing
+              , name = ""
+      }
+
+-- helper for score function
+addPlayerScore model points =
+  { model | totalPointsScored = model.totalPointsScored + points
+  }
+
+resetPlayerScore model playerId =
+  let
+      home =
+        model.playerHome
+        |> List.map (\player ->
+            case (player.id == playerId) of
+              True ->
+                { player | totalPointsScored = 0 }
+              False ->
+                player
+          )
+      away =
+        model.playerAway
+        |> List.map (\player ->
+            case (player.id == playerId) of
+              True ->
+                { player | totalPointsScored = 0 }
+              False ->
+                player
+          )
+  in
+      { model | playerHome = home
+              , playerAway = away
+              , scoreHome = home |> List.map .totalPointsScored |> List.sum
+              , scoreAway = away |> List.map .totalPointsScored |> List.sum
+              , id = Nothing
+              , name = ""
+      }
 
 -- View
 
 view : Model -> Html Msg
 view model =
-  div [ class "row" ]
-    [ div [ class "col" ]
-        [ h3 [] [ text "Name" ]
-        , playerSection model
-        , playerInput model
+  div []
+    [ div [ class "row" ]
+        [ div [ class "col" ]
+            [ div [ class "header-score" ]
+                [ h2 [] [ text "Home" ]
+                , h1 [] [ text (String.fromInt model.scoreHome) ]
+                ]
+            , h3 [ class "header-player" ]
+                [ span [] [ text "Name" ]
+                , span [] [ text "Points" ]
+                ]
+            , playerSectionHome model
+            ]
+        , div [ class "col" ]
+            [ div [ class "header-score" ]
+                [ h2 [] [ text "Away" ]
+                , h1 [] [ text (String.fromInt model.scoreAway) ]
+                ]
+            , h3 [ class "header-player" ]
+                [ span [] [ text "Name" ]
+                , span [] [ text "Points" ]
+                ]
+            , playerSectionAway model
+            ]
         ]
-    , div [ class "col" ]
-        [ debugSection model ]
+    , div [ class "row" ]
+        [ div [ class "col" ]
+            [ playerInput model
+            , debugSection model
+            ]
+        ]
     ]
 
-playerSection : Model -> Html Msg
-playerSection model =
-  model.players
-  |> List.map player
+playerSectionHome model =
+  model.playerHome
+  |> List.map playerHome
   |> ul []
 
-player : Player -> Html Msg
-player playerModel =
+playerSectionAway model =
+  model.playerAway
+  |> List.map playerAway
+  |> ul []
+
+playerHome playerModel =
   li []
-    [ i [ class "far fa-trash-alt"
-        , onClick (DeleteButton playerModel.name)
+    [ i [ class "fa fa-trash-alt"
+        , onClick (DeletePlayer playerModel.name)
         ]
         []
-    , i [ class "far fa-edit"
-        , onClick (EditButton playerModel.name playerModel.id)
+    , i [ class "fa fa-edit"
+        , onClick (EditPlayer playerModel.name playerModel.id "Home")
         ]
         []
     , span [ class "player-name"
-            , onClick (EditButton playerModel.name playerModel.id)
+            , onClick (EditPlayer playerModel.name playerModel.id "Home")
             ]
         [text (playerModel.name) ]
-    , span []
-        [ text "score here" ]
+    , span [ class "points-group" ]
+        [ button [ type_ "button"
+                  , onClick (ScoreButton -1 playerModel.id)
+                  ]
+            [ text "-" ]
+        , button [ type_ "button"
+                  , onClick (ScoreButton 1 playerModel.id)
+                  ]
+            [ text "1" ]
+        , button [ type_ "button"
+                  , onClick (ScoreButton 2 playerModel.id)
+                  ]
+            [ text "2" ]
+        , button [ type_ "button"
+                  , onClick (ScoreButton 3 playerModel.id)
+                  ]
+            [ text "3" ]
+        , button [ type_ "button"
+                  , onClick (ResetPlayerScore playerModel.id)
+                  ]
+            [ text "R" ]
+        ]
+    , span [ class "player-score" ]
+        [ text (String.fromInt playerModel.totalPointsScored) ]
     ]
 
-playerInput : Model -> Html Msg
+playerAway playerModel =
+  li []
+    [ i [ class "fa fa-trash-alt"
+        , onClick (DeletePlayer playerModel.name)
+        ]
+        []
+    , i [ class "fa fa-edit"
+        , onClick (EditPlayer playerModel.name playerModel.id "Away")
+        ]
+        []
+    , span [ class "player-name"
+            , onClick (EditPlayer playerModel.name playerModel.id "Away")
+            ]
+        [text (playerModel.name) ]
+    , span [ class "points-group" ]
+        [ button [ type_ "button"
+                  , onClick (ScoreButton -1 playerModel.id)
+                  ]
+            [ text "-" ]
+        , button [ type_ "button"
+                  , onClick (ScoreButton 1 playerModel.id)
+                  ]
+            [ text "1" ]
+        , button [ type_ "button"
+                  , onClick (ScoreButton 2 playerModel.id)
+                  ]
+            [ text "2" ]
+        , button [ type_ "button"
+                  , onClick (ScoreButton 3 playerModel.id)
+                  ]
+            [ text "3" ]
+        , button [ type_ "button"
+                  , onClick (ResetPlayerScore playerModel.id)
+                  ]
+            [ text "R" ]
+        ]
+    , span [ class "player-score" ]
+        [ text (String.fromInt playerModel.totalPointsScored) ]
+    ]
+
 playerInput model =
   Html.form [ onSubmit SaveButton ]
-    [ input [ type_ "text"
+    [ select [ onInput Team ]
+        [ option [ value ""
+                  , disabled True
+                  , selected True
+                  --, hidden True
+                  ]
+            [ text "Select Team" ]
+        , option [ value "Home" ]
+            [ text "Home" ]
+        , option [ value "Away" ]
+            [ text "Away" ]
+        ]
+    , input [ type_ "text"
             , onInput Input
             , placeholder "Enter Player..."
             , value model.name
@@ -198,7 +462,9 @@ playerInput model =
         []
     , button [ type_ "submit" ]
         [ text "Save" ]
-    , button [ type_ "button" , onClick ClearButton ]
+    , button [ type_ "button"
+              , class "button-cancel"
+              , onClick ClearButton ]
         [ text "Cancel" ]
     ]
 
@@ -210,12 +476,20 @@ debugSection model =
         , text (Debug.toString model.name)
         ]
     , h3 []
-        [ text "Players: "
-        , text (Debug.toString model.players)
+        [ text "Team: "
+        , text (Debug.toString model.inputTeam)
         ]
     , h3 []
         [ text "Id: "
         , text (Debug.toString model.id)
+        ]
+    , h3 []
+        [ text "Player - Home: "
+        , text (Debug.toString model.playerHome)
+        ]
+    , h3 []
+        [ text "Player - Away: "
+        , text (Debug.toString model.playerAway)
         ]
     ]
 

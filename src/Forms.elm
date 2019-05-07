@@ -8,87 +8,63 @@ import Debug exposing (..)
 
 
 
--- MAIN
+-- Model
 
-main =
-  Browser.sandbox
-    { init = init
-    , update = update
-    , view = view
-    }
+type alias Team =
+  { players : List Player
+  }
 
-
-
--- MODEL
+type alias Player =
+  { name : String
+  , id : Int
+  }
 
 type alias Model =
-  { content : String
-  , input : String
+  { name : String
+  , team : Team
+  , id : Maybe Int
   }
 
-init : Model
 init =
-  { content = ""
-  , input = ""
+  { name = ""
+  , team =
+      { players = []
+      }
+  , id = Nothing
+  }
+
+sample =
+  { name = ""
+  , team =
+      { players =
+          [ { name = "Jordan", id = 0 }
+          , { name = "Michelle", id = 3 }
+          ]
+      }
+  , id = Nothing
   }
 
 
 
--- Update
+-- helper for add function
+addData : String
+  -> { a | players : List Player }
+  -> { a | players : List Player }
+addData playerName model =
+  { model | players = Player playerName (List.length model.players) :: model.players }
+-- sample.team |> addData "WTF???"
 
-type Msg
-  = Clear
-  | Add
-  | Option String
+setData playerName model =
+  { model | name = playerName }
 
-update : Msg -> Model -> Model
-update msg model =
-  case msg of
-
-    Clear ->
-      init
-
-    Add ->
-      { model | content = model.input
-      }
-
-    Option value ->
-      { model | input = value
-      }
-
-
-
--- View
-
-view : Model -> Html Msg
-view model =
-  div []
-    [ h1 [] [ text ("Content: " ++ model.content) ]
-    , label [ for "content" ]
-        [ text "Choose: " ]
-    , select [ id "content" ]
-        [ option [ value "" ]
-            [ text "--Please choose an option--" ]
-        , option [ value "dog"
-                  ]
-            [ text "Dog" ]
-        , option [ value "cat" ]
-            [ text "Cat" ]
-        , option [ value "hamster" ]
-            [ text "Hamster" ]
-        ]
-    , button [ type_ "button"
-              , onClick Add
-              ]
-        [ text "Add" ]
-    , button [ type_ "button"
-              , onClick Clear
-              ]
-        [ text "Clear" ]
-    , div []
-        [ h3 [] [ text ("content: " ++ model.content) ]
-        , h3 [] [ text ("input: " ++ model.input) ]
-        ]
-    ]
-
-
+{--}
+result =
+  sample.team.players
+  |> List.map (\player ->
+      case (player.id == 0) of
+        True ->
+          setData "Michael Jordan" player
+        False ->
+          player
+    )
+{--}

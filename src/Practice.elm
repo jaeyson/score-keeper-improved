@@ -21,28 +21,35 @@ main =
 
 type alias Model =
   { name : String
-  , players : List Player
-  , id : Maybe Int
-  , score : List Score
+  , playerHome : List PlayerHome
+  , playerAway : List PlayerAway
+  , scoreHome : Int
+  , scoreAway : Int
+  , id : Maybe String
+  , inputTeam : String
   }
 
-type alias Player=
-  { id : Int
-  , name : String
-  , totalPointsScored : Int
-  }
-
-type alias Score=
+type alias PlayerHome =
   { name : String
-  , points : Int
+  , totalPointsScored : Int
+  , id : String
+  }
+
+type alias PlayerAway =
+  { name : String
+  , totalPointsScored : Int
+  , id : String
   }
 
 init : Model
 init =
   { name = ""
-  , players = []
+  , playerHome = []
+  , playerAway = []
+  , scoreHome = 0
+  , scoreAway = 0
   , id = Nothing
-  , score = []
+  , inputTeam = ""
   }
 
 
@@ -51,12 +58,13 @@ init =
 
 type Msg
   = Input String
+  | Team String
   | ClearButton
   | SaveButton
-  | EditPlayer String Int
+  | EditPlayer String String String
   | DeletePlayer String
-  | ScoreButton Int Int
-  | ResetPlayerScore Int
+  | ScoreButton Int String
+  | ResetPlayerScore String
 
 update : Msg -> Model -> Model
 update msg model =
@@ -64,12 +72,18 @@ update msg model =
 
     ClearButton ->
       { model | name = ""
+              , inputTeam = ""
               , id = Nothing
       }
 
     Input name ->
       { model | name = name
       }
+
+    Team name ->
+      { model | inputTeam = name
+      }
+
 
     SaveButton ->
       case (String.isEmpty model.name) of
@@ -80,9 +94,10 @@ update msg model =
         False ->
           save model
 
-    EditPlayer playerName playerId->
+    EditPlayer playerName playerId team ->
       { model | name = playerName
               , id =  Just playerId
+              , inputTeam = team
       }
 
     DeletePlayer playerName ->
@@ -116,91 +131,242 @@ save model =
   --}
 
 add model =
+  case model.inputTeam of
+    "Home" ->
+      addHomePlayerName model model.name
+
+    "Away" ->
+      addAwayPlayerName model model.name
+
+    _ ->
+      { model | name = ""
+              , inputTeam = ""
+              , id = Nothing
+      }
+
+-- helper for add function
+addHomePlayerName model playerName =
   let
       newPlayer =
-        Player (List.length model.players) model.name 0
-
+        PlayerHome playerName 0 ("Home" ++ (String.fromInt (List.length model.playerHome)))
       allPlayers =
-        newPlayer :: model.players
+        newPlayer :: model.playerHome
   in
-      { model | players = allPlayers
-              , name = ""
+      { model | playerHome = allPlayers
               , id = Nothing
+              , name = ""
+              , inputTeam = ""
       }
+
+addAwayPlayerName model playerName =
+  let
+      newPlayer =
+        PlayerAway playerName 0 ("Away" ++ (String.fromInt (List.length model.playerAway)))
+      allPlayers =
+        newPlayer :: model.playerAway
+  in
+      { model | playerAway = allPlayers
+              , id = Nothing
+              , name = ""
+              , inputTeam = ""
+      }
+-- addHomePlayerName model.away "WTF???"
+
+
 
 -- edit model playerId
-edit model value =
+edit model playerId =
+  case model.inputTeam of
+    "Home" ->
+      editHomePlayerName model playerId
+
+    "Away" ->
+      editAwayPlayerName model playerId
+
+    _ ->
+      model
+
+-- helper for edit function
+editHomePlayerName model playerId =
   let
       result =
-        model.players
-        |> List.map (\content ->
-            case (content.id == value) of
+        model.playerHome
+        |> List.map (\player ->
+            case (player.id == playerId) of
               True ->
-                setPlayerName content model.name
+                { player | name = model.name
+                }
               False ->
-                content
+                player
           )
   in
-      { model | players = result
-              , name = ""
+      { model | playerHome = result
               , id = Nothing
+              , name = ""
+              , inputTeam = ""
       }
 
--- Helper Function
-setPlayerName model newName =
-  { model | name  = newName
-  }
+editAwayPlayerName model playerId =
+  let
+      result =
+        model.playerAway
+        |> List.map (\player ->
+            case (player.id == playerId) of
+              True ->
+                { player | name = model.name
+                }
+              False ->
+                player
+          )
+  in
+      { model | playerAway = result
+              , id = Nothing
+              , name = ""
+              , inputTeam = ""
+      }
 
-delete : Model -> String -> Model
 delete model playerName =
   let
-      result =
-        model.players
-        |> List.filter (\deletePlayer -> deletePlayer.name /= playerName)
+      home =
+        model.playerHome
+        |> List.filter (\player -> player.name /= playerName)
+
+      away =
+        model.playerAway
+        |> List.filter (\player -> player.name /= playerName)
   in
-      { model | players = result
-              , name = ""
-              , id = Nothing
-      }
+      case ((List.isEmpty home), (List.isEmpty away)) of
+        (True,True) ->
+          { model | playerHome = home
+                  , playerAway = away
+                  , id = Nothing
+                  , name = ""
+                  , inputTeam = ""
+          }
+        (True,False) ->
+          { model | playerHome = home
+                  , id = Nothing
+                  , name = ""
+                  , inputTeam = ""
+          }
+        (False,True) ->
+          { model | playerAway = away
+                  , id = Nothing
+                  , name = ""
+                  , inputTeam = ""
+          }
+        (False,False) ->
+          model
+  {--
+  case model.inputTeam of
+    "Home" ->
+      let
+          result =
+            model.playerHome
+            |> List.filter (\player -> player.name /= playerName)
+      in
+          { model | playerHome = result
+          }
+
+    "Away" ->
+      let
+          result =
+            model.playerAway
+            |> List.filter (\player -> player.name /= playerName)
+      in
+          { model | playerAway = result
+          }
+
+    _ ->
+      model
+  --}
 
 score model points playerId =
-  let
-      result =
-        model.players
-        |> List.map (\scorePlayer ->
-            case (scorePlayer.id == playerId) of
-              True ->
-                addPlayerScore scorePlayer points
-              False ->
-                scorePlayer
-          )
-  in
-      { model | players = result
-              , name = ""
-              , id = Nothing
-      }
+  case model.inputTeam of
+    "Home" ->
+      let
+          result =
+            model.playerHome
+            |> List.map (\player ->
+                case (player.id == playerId) of
+                  True ->
+                    addPlayerScore player points
+                  False ->
+                    player
+              )
+      in
+          { model | playerHome = result
+                  , id = Nothing
+                  , name = ""
+                  , inputTeam = ""
+          }
 
--- Helper Function
+    "Away" ->
+      let
+          result =
+            model.playerAway
+            |> List.map (\player ->
+                case (player.id == playerId) of
+                  True ->
+                    addPlayerScore player points
+                  False ->
+                    player
+              )
+      in
+          { model | playerAway = result
+                  , id = Nothing
+                  , name = ""
+                  , inputTeam = ""
+          }
+
+    _ ->
+      model
+
+-- helper for score function
 addPlayerScore model points =
   { model | totalPointsScored = model.totalPointsScored + points
   }
 
 resetPlayerScore model playerId =
-  let
-      result =
-        model.players
-        |> List.map (\scorePlayer ->
-            case (scorePlayer.id == playerId) of
-              True ->
-                { scorePlayer | totalPointsScored = 0 }
-              False ->
-                scorePlayer
-          )
-  in
-      { model | players = result
-              , name = ""
-              , id = Nothing
-      }
+  case model.inputTeam of
+    "Home" ->
+      let
+          result =
+            model.playerHome
+            |> List.map (\player ->
+                case (player.id == playerId) of
+                  True ->
+                    { player | totalPointsScored = 0 }
+                  False ->
+                    player
+              )
+      in
+          { model | playerHome = result
+                  , id = Nothing
+                  , name = ""
+                  , inputTeam = ""
+          }
+
+    "Away" ->
+      let
+          result =
+            model.playerAway
+            |> List.map (\player ->
+                case (player.id == playerId) of
+                  True ->
+                    { player | totalPointsScored = 0 }
+                  False ->
+                    player
+              )
+      in
+          { model | playerAway = result
+                  , id = Nothing
+                  , name = ""
+                  , inputTeam = ""
+          }
+
+    _ ->
+      model
 
   {--
   let
@@ -234,7 +400,7 @@ view model =
                 [ span [] [ text "Name" ]
                 , span [] [ text "Points" ]
                 ]
-            , playerSection model
+            , playerSectionHome model
             ]
         , div [ class "col" ]
             [ div [ class "header-score" ]
@@ -245,7 +411,7 @@ view model =
                 [ span [] [ text "Name" ]
                 , span [] [ text "Points" ]
                 ]
-            , playerSection model
+            , playerSectionAway model
             ]
         ]
     , div [ class "row" ]
@@ -256,31 +422,28 @@ view model =
         ]
     ]
 
-playerSectionLeft : Model -> Html Msg
-playerSectionLeft model =
-  model.players
-  |> List.map playerLeft
+playerSectionHome model =
+  model.playerHome
+  |> List.map playerHome
   |> ul []
 
-playerSectionRight : Model -> Html Msg
-playerSectionRight model =
-  model.players
-  |> List.map playerRight
+playerSectionAway model =
+  model.playerAway
+  |> List.map playerAway
   |> ul []
 
-playerLeft : Player -> Html Msg
-playerLeft playerModel =
+playerHome playerModel =
   li []
     [ i [ class "fa fa-trash-alt"
         , onClick (DeletePlayer playerModel.name)
         ]
         []
     , i [ class "fa fa-edit"
-        , onClick (EditPlayer playerModel.name playerModel.id)
+        , onClick (EditPlayer playerModel.name playerModel.id "Home")
         ]
         []
     , span [ class "player-name"
-            , onClick (EditPlayer playerModel.name playerModel.id)
+            , onClick (EditPlayer playerModel.name playerModel.id "Home")
             ]
         [text (playerModel.name) ]
     , span [ class "points-group" ]
@@ -309,19 +472,18 @@ playerLeft playerModel =
         [ text (String.fromInt playerModel.totalPointsScored) ]
     ]
 
-playerRight : Player -> Html Msg
-playerRight playerModel =
+playerAway playerModel =
   li []
     [ i [ class "fa fa-trash-alt"
         , onClick (DeletePlayer playerModel.name)
         ]
         []
     , i [ class "fa fa-edit"
-        , onClick (EditPlayer playerModel.name playerModel.id)
+        , onClick (EditPlayer playerModel.name playerModel.id "Away")
         ]
         []
     , span [ class "player-name"
-            , onClick (EditPlayer playerModel.name playerModel.id)
+            , onClick (EditPlayer playerModel.name playerModel.id "Away")
             ]
         [text (playerModel.name) ]
     , span [ class "points-group" ]
@@ -350,27 +512,21 @@ playerRight playerModel =
         [ text (String.fromInt playerModel.totalPointsScored) ]
     ]
 
-playerInputLeft : Model -> Html Msg
-playerInputLeft model =
+playerInput model =
   Html.form [ onSubmit SaveButton ]
-    [ input [ type_ "text"
-            , onInput Input
-            , placeholder "Enter Player..."
-            , value model.name
-            ]
-        []
-    , button [ type_ "submit" ]
-        [ text "Save" ]
-    , button [ type_ "button"
-              , class "button-cancel"
-              , onClick ClearButton ]
-        [ text "Cancel" ]
-    ]
-
-playerInputRight : Model -> Html Msg
-playerInputRight model =
-  Html.form [ onSubmit SaveButton ]
-    [ input [ type_ "text"
+    [ select [ onInput Team ]
+        [ option [ value ""
+                  , disabled True
+                  , selected True
+                  , hidden True
+                  ]
+            [ text "Select Team" ]
+        , option [ value "Home" ]
+            [ text "Home" ]
+        , option [ value "Away" ]
+            [ text "Away" ]
+        ]
+    , input [ type_ "text"
             , onInput Input
             , placeholder "Enter Player..."
             , value model.name
@@ -392,12 +548,20 @@ debugSection model =
         , text (Debug.toString model.name)
         ]
     , h3 []
-        [ text "Players: "
-        , text (Debug.toString model.players)
+        [ text "Team: "
+        , text (Debug.toString model.inputTeam)
         ]
     , h3 []
         [ text "Id: "
         , text (Debug.toString model.id)
+        ]
+    , h3 []
+        [ text "Player - Home: "
+        , text (Debug.toString model.playerHome)
+        ]
+    , h3 []
+        [ text "Player - Away: "
+        , text (Debug.toString model.playerAway)
         ]
     ]
 

@@ -4517,17 +4517,17 @@ var author$project$Main$delete = F2(
 			if (_n0.b) {
 				return _Utils_update(
 					model,
-					{id: elm$core$Maybe$Nothing, name: '', playerAway: away, playerHome: home});
+					{id: elm$core$Maybe$Nothing, inputTeam: '', name: '', playerAway: away, playerHome: home});
 			} else {
 				return _Utils_update(
 					model,
-					{id: elm$core$Maybe$Nothing, name: '', playerHome: home});
+					{id: elm$core$Maybe$Nothing, inputTeam: '', name: '', playerHome: home});
 			}
 		} else {
 			if (_n0.b) {
 				return _Utils_update(
 					model,
-					{id: elm$core$Maybe$Nothing, name: '', playerAway: away});
+					{id: elm$core$Maybe$Nothing, inputTeam: '', name: '', playerAway: away});
 			} else {
 				return model;
 			}
@@ -4583,6 +4583,7 @@ var author$project$Main$resetPlayerScore = F2(
 			model,
 			{
 				id: elm$core$Maybe$Nothing,
+				inputTeam: '',
 				name: '',
 				playerAway: away,
 				playerHome: home,
@@ -4632,7 +4633,7 @@ var author$project$Main$addAwayPlayerName = F2(
 		var allPlayers = A2(elm$core$List$cons, newPlayer, model.playerAway);
 		return _Utils_update(
 			model,
-			{id: elm$core$Maybe$Nothing, name: '', playerAway: allPlayers});
+			{id: elm$core$Maybe$Nothing, inputTeam: '', name: '', playerAway: allPlayers});
 	});
 var author$project$Main$PlayerHome = F3(
 	function (name, totalPointsScored, id) {
@@ -4649,7 +4650,7 @@ var author$project$Main$addHomePlayerName = F2(
 		var allPlayers = A2(elm$core$List$cons, newPlayer, model.playerHome);
 		return _Utils_update(
 			model,
-			{id: elm$core$Maybe$Nothing, name: '', playerHome: allPlayers});
+			{id: elm$core$Maybe$Nothing, inputTeam: '', name: '', playerHome: allPlayers});
 	});
 var author$project$Main$add = function (model) {
 	var _n0 = model.inputTeam;
@@ -4661,7 +4662,7 @@ var author$project$Main$add = function (model) {
 		default:
 			return _Utils_update(
 				model,
-				{id: elm$core$Maybe$Nothing, name: ''});
+				{id: elm$core$Maybe$Nothing, inputTeam: '', name: ''});
 	}
 };
 var author$project$Main$editAwayPlayerName = F2(
@@ -4681,7 +4682,7 @@ var author$project$Main$editAwayPlayerName = F2(
 			model.playerAway);
 		return _Utils_update(
 			model,
-			{id: elm$core$Maybe$Nothing, name: '', playerAway: result});
+			{id: elm$core$Maybe$Nothing, inputTeam: '', name: '', playerAway: result});
 	});
 var author$project$Main$editHomePlayerName = F2(
 	function (model, playerId) {
@@ -4700,7 +4701,7 @@ var author$project$Main$editHomePlayerName = F2(
 			model.playerHome);
 		return _Utils_update(
 			model,
-			{id: elm$core$Maybe$Nothing, name: '', playerHome: result});
+			{id: elm$core$Maybe$Nothing, inputTeam: '', name: '', playerHome: result});
 	});
 var author$project$Main$edit = F2(
 	function (model, playerId) {
@@ -4757,6 +4758,7 @@ var author$project$Main$score = F3(
 			model,
 			{
 				id: elm$core$Maybe$Nothing,
+				inputTeam: '',
 				name: '',
 				playerAway: away,
 				playerHome: home,
@@ -4785,7 +4787,7 @@ var author$project$Main$update = F2(
 			case 'ClearButton':
 				return _Utils_update(
 					model,
-					{id: elm$core$Maybe$Nothing, name: ''});
+					{id: elm$core$Maybe$Nothing, inputTeam: '', name: ''});
 			case 'Input':
 				var name = msg.a;
 				return _Utils_update(
@@ -4801,7 +4803,7 @@ var author$project$Main$update = F2(
 				if (_n1) {
 					return _Utils_update(
 						model,
-						{name: ''});
+						{id: elm$core$Maybe$Nothing, inputTeam: '', name: ''});
 				} else {
 					return author$project$Main$save(model);
 				}
@@ -5283,6 +5285,7 @@ var elm$html$Html$Attributes$boolProperty = F2(
 			elm$json$Json$Encode$bool(bool));
 	});
 var elm$html$Html$Attributes$disabled = elm$html$Html$Attributes$boolProperty('disabled');
+var elm$html$Html$Attributes$hidden = elm$html$Html$Attributes$boolProperty('hidden');
 var elm$html$Html$Attributes$placeholder = elm$html$Html$Attributes$stringProperty('placeholder');
 var elm$html$Html$Attributes$selected = elm$html$Html$Attributes$boolProperty('selected');
 var elm$html$Html$Attributes$type_ = elm$html$Html$Attributes$stringProperty('type');
@@ -5381,8 +5384,9 @@ var author$project$Main$playerInput = function (model) {
 						_List_fromArray(
 							[
 								elm$html$Html$Attributes$value(''),
+								elm$html$Html$Attributes$selected(model.inputTeam === ''),
 								elm$html$Html$Attributes$disabled(true),
-								elm$html$Html$Attributes$selected(true)
+								elm$html$Html$Attributes$hidden(true)
 							]),
 						_List_fromArray(
 							[

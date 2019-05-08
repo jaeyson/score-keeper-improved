@@ -73,6 +73,7 @@ update msg model =
     ClearButton ->
       { model | name = ""
               , id = Nothing
+              , inputTeam = ""
       }
 
     Input name ->
@@ -88,6 +89,8 @@ update msg model =
       case (String.isEmpty model.name) of
         True ->
           { model | name = ""
+                  , id = Nothing
+                  , inputTeam = ""
           }
 
         False ->
@@ -140,6 +143,7 @@ add model =
     _ ->
       { model | name = ""
               , id = Nothing
+              , inputTeam = ""
       }
 
 -- helper for add function
@@ -153,6 +157,7 @@ addHomePlayerName model playerName =
       { model | playerHome = allPlayers
               , id = Nothing
               , name = ""
+              , inputTeam = ""
       }
 
 addAwayPlayerName model playerName =
@@ -165,6 +170,7 @@ addAwayPlayerName model playerName =
       { model | playerAway = allPlayers
               , id = Nothing
               , name = ""
+              , inputTeam = ""
       }
 -- addHomePlayerName model.away "WTF???"
 
@@ -199,6 +205,7 @@ editHomePlayerName model playerId =
       { model | playerHome = result
               , id = Nothing
               , name = ""
+              , inputTeam = ""
       }
 
 editAwayPlayerName model playerId =
@@ -217,6 +224,7 @@ editAwayPlayerName model playerId =
       { model | playerAway = result
               , id = Nothing
               , name = ""
+              , inputTeam = ""
       }
 
 delete model playerName =
@@ -235,16 +243,19 @@ delete model playerName =
                   , playerAway = away
                   , id = Nothing
                   , name = ""
+                  , inputTeam = ""
           }
         (True,False) ->
           { model | playerHome = home
                   , id = Nothing
                   , name = ""
+                  , inputTeam = ""
           }
         (False,True) ->
           { model | playerAway = away
                   , id = Nothing
                   , name = ""
+                  , inputTeam = ""
           }
         (False,False) ->
           model
@@ -277,6 +288,7 @@ score model points playerId =
               , scoreAway = away |> List.map .totalPointsScored |> List.sum
               , id = Nothing
               , name = ""
+              , inputTeam = ""
       }
 
 -- helper for score function
@@ -311,6 +323,7 @@ resetPlayerScore model playerId =
               , scoreAway = away |> List.map .totalPointsScored |> List.sum
               , id = Nothing
               , name = ""
+              , inputTeam = ""
       }
 
 -- View
@@ -444,9 +457,9 @@ playerInput model =
   Html.form [ onSubmit SaveButton ]
     [ select [ onInput Team ]
         [ option [ value ""
+                  , selected (model.inputTeam == "")
                   , disabled True
-                  , selected True
-                  --, hidden True
+                  , hidden True
                   ]
             [ text "Select Team" ]
         , option [ value "Home" ]

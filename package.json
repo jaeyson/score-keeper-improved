@@ -1,7 +1,7 @@
 {
-  "name": "elm-sample",
+  "name": "score-keeper-improved",
   "version": "1.0.0",
-  "description": "making blog using mdgriffith/elm-markup",
+  "description": "my own take from knowthen elm scorekeeper app",
   "main": "elm.js",
   "dependencies": {},
   "devDependencies": {
@@ -12,7 +12,15 @@
     "build": "./optimize.sh src/Main.elm",
     "watch": "watch 'npm run build' ./src"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jaeyson/score-keeper-improved.git"
+  },
   "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "author": "Jaeyson Anthony Y.",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jaeyson/score-keeper-improved/issues"
+  },
+  "homepage": "https://github.com/jaeyson/score-keeper-improved#readme"
 }

@@ -1,7 +1,5 @@
 ## Scorekeeper Improved
 
----
-
 My own take on learning Elm using [Knowthen's](https://github.com/knowthen/elm) Elm tutorial.
 
 Visit the [Demo](https://gitcdn.xyz/repo/jaeyson/score-keeper-improved/master/index.html)

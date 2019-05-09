@@ -462,9 +462,13 @@ playerInput model =
                   , hidden True
                   ]
             [ text "Select Team" ]
-        , option [ value "Home" ]
+        , option [ value "Home"
+                  , selected (model.inputTeam == "Home")
+                  ]
             [ text "Home" ]
-        , option [ value "Away" ]
+        , option [ value "Away"
+                  , selected (model.inputTeam == "Away")
+                  ]
             [ text "Away" ]
         ]
     , input [ type_ "text"

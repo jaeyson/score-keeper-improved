@@ -5396,7 +5396,8 @@ var author$project$Main$playerInput = function (model) {
 						elm$html$Html$option,
 						_List_fromArray(
 							[
-								elm$html$Html$Attributes$value('Home')
+								elm$html$Html$Attributes$value('Home'),
+								elm$html$Html$Attributes$selected(model.inputTeam === 'Home')
 							]),
 						_List_fromArray(
 							[
@@ -5406,7 +5407,8 @@ var author$project$Main$playerInput = function (model) {
 						elm$html$Html$option,
 						_List_fromArray(
 							[
-								elm$html$Html$Attributes$value('Away')
+								elm$html$Html$Attributes$value('Away'),
+								elm$html$Html$Attributes$selected(model.inputTeam === 'Away')
 							]),
 						_List_fromArray(
 							[

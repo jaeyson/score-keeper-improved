@@ -1,12 +1,6 @@
 # Created by https://www.gitignore.io/api/elm,node
 # Edit at https://www.gitignore.io/?templates=elm,node
 
-### Sass ###
-.sass-cache/
-*.css.map
-*.sass.map
-*.scss.map
-
 ### Elm ###
 # elm-package generated files
 elm-stuff
@@ -99,4 +93,4 @@ typings/
 # DynamoDB Local files
 .dynamodb/
 
-# End of https://www.gitignore.io/api/elm,node,sass
+# End of https://www.gitignore.io/api/elm,node

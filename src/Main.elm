@@ -485,6 +485,7 @@ playerInput model =
         [ text "Cancel" ]
     ]
 
+{--}
 debugSection : Model -> Html Msg
 debugSection model =
   div []
@@ -509,4 +510,5 @@ debugSection model =
         , text (Debug.toString model.playerAway)
         ]
     ]
+{--}
 

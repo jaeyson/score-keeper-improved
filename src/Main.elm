@@ -3,11 +3,12 @@ import Browser exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Debug exposing (..)
+import Debug exposing (toString)
 
 
 -- Main
 
+main : Program () Model Msg
 main =
   Browser.sandbox
     { init = init
@@ -111,6 +112,7 @@ update msg model =
     ResetPlayerScore playerId ->
       resetPlayerScore model playerId
 
+save : Model -> Model
 save model =
   case model.id of
     Just playerId ->
@@ -132,6 +134,7 @@ save model =
           add model
   --}
 
+add : Model -> Model
 add model =
   case model.inputTeam of
     "Home" ->
@@ -147,6 +150,7 @@ add model =
       }
 
 -- helper for add function
+addHomePlayerName : Model -> String -> Model
 addHomePlayerName model playerName =
   let
       newPlayer =
@@ -160,6 +164,7 @@ addHomePlayerName model playerName =
               , inputTeam = ""
       }
 
+addAwayPlayerName : Model -> String -> Model
 addAwayPlayerName model playerName =
   let
       newPlayer =
@@ -177,6 +182,7 @@ addAwayPlayerName model playerName =
 
 
 -- edit model playerId
+edit : Model -> String -> Model
 edit model playerId =
   case model.inputTeam of
     "Home" ->
@@ -189,6 +195,7 @@ edit model playerId =
       model
 
 -- helper for edit function
+editHomePlayerName : Model -> String -> Model
 editHomePlayerName model playerId =
   let
       result =
@@ -208,6 +215,7 @@ editHomePlayerName model playerId =
               , inputTeam = ""
       }
 
+editAwayPlayerName : Model -> String -> Model
 editAwayPlayerName model playerId =
   let
       result =
@@ -227,6 +235,7 @@ editAwayPlayerName model playerId =
               , inputTeam = ""
       }
 
+delete : Model -> String -> Model
 delete model playerName =
   let
       home =
@@ -260,6 +269,7 @@ delete model playerName =
         (False,False) ->
           model
 
+score : Model -> Int -> String -> Model
 score model points playerId =
   let
       home =
@@ -292,10 +302,14 @@ score model points playerId =
       }
 
 -- helper for score function
+addPlayerScore : { a | totalPointsScored : Int }
+                 -> Int
+                 -> { a | totalPointsScored : Int }
 addPlayerScore model points =
   { model | totalPointsScored = model.totalPointsScored + points
   }
 
+resetPlayerScore : Model -> String -> Model
 resetPlayerScore model playerId =
   let
       home =
@@ -363,16 +377,21 @@ view model =
         ]
     ]
 
+playerSectionHome : { a | playerHome : List PlayerHome }
+                  -> Html Msg
 playerSectionHome model =
   model.playerHome
   |> List.map playerHome
   |> ul []
 
+playerSectionAway : { a | playerAway : List PlayerAway }
+                  -> Html Msg
 playerSectionAway model =
   model.playerAway
   |> List.map playerAway
   |> ul []
 
+playerHome : PlayerHome -> Html Msg
 playerHome playerModel =
   li []
     [ i [ class "fa fa-trash-alt"
@@ -413,6 +432,7 @@ playerHome playerModel =
         [ text (String.fromInt playerModel.totalPointsScored) ]
     ]
 
+playerAway : PlayerAway -> Html Msg
 playerAway playerModel =
   li []
     [ i [ class "fa fa-trash-alt"
@@ -453,6 +473,7 @@ playerAway playerModel =
         [ text (String.fromInt playerModel.totalPointsScored) ]
     ]
 
+playerInput : Model -> Html Msg
 playerInput model =
   Html.form [ onSubmit SaveButton ]
     [ select [ onInput Team ]

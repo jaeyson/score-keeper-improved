@@ -4496,6 +4496,23 @@ var elm$core$List$isEmpty = function (xs) {
 		return false;
 	}
 };
+var elm$core$List$map = F2(
+	function (f, xs) {
+		return A3(
+			elm$core$List$foldr,
+			F2(
+				function (x, acc) {
+					return A2(
+						elm$core$List$cons,
+						f(x),
+						acc);
+				}),
+			_List_Nil,
+			xs);
+	});
+var elm$core$List$sum = function (numbers) {
+	return A3(elm$core$List$foldl, elm$core$Basics$add, 0, numbers);
+};
 var author$project$Main$delete = F2(
 	function (model, playerName) {
 		var home = A2(
@@ -4517,40 +4534,81 @@ var author$project$Main$delete = F2(
 			if (_n0.b) {
 				return _Utils_update(
 					model,
-					{id: elm$core$Maybe$Nothing, inputTeam: '', name: '', playerAway: away, playerHome: home});
+					{
+						id: elm$core$Maybe$Nothing,
+						inputTeam: '',
+						name: '',
+						playerAway: away,
+						playerHome: home,
+						scoreAway: elm$core$List$sum(
+							A2(
+								elm$core$List$map,
+								function ($) {
+									return $.totalPointsScored;
+								},
+								away)),
+						scoreHome: elm$core$List$sum(
+							A2(
+								elm$core$List$map,
+								function ($) {
+									return $.totalPointsScored;
+								},
+								home))
+					});
 			} else {
 				return _Utils_update(
 					model,
-					{id: elm$core$Maybe$Nothing, inputTeam: '', name: '', playerHome: home});
+					{
+						id: elm$core$Maybe$Nothing,
+						inputTeam: '',
+						name: '',
+						playerHome: home,
+						scoreAway: elm$core$List$sum(
+							A2(
+								elm$core$List$map,
+								function ($) {
+									return $.totalPointsScored;
+								},
+								away)),
+						scoreHome: elm$core$List$sum(
+							A2(
+								elm$core$List$map,
+								function ($) {
+									return $.totalPointsScored;
+								},
+								home))
+					});
 			}
 		} else {
 			if (_n0.b) {
 				return _Utils_update(
 					model,
-					{id: elm$core$Maybe$Nothing, inputTeam: '', name: '', playerAway: away});
+					{
+						id: elm$core$Maybe$Nothing,
+						inputTeam: '',
+						name: '',
+						playerAway: away,
+						scoreAway: elm$core$List$sum(
+							A2(
+								elm$core$List$map,
+								function ($) {
+									return $.totalPointsScored;
+								},
+								away)),
+						scoreHome: elm$core$List$sum(
+							A2(
+								elm$core$List$map,
+								function ($) {
+									return $.totalPointsScored;
+								},
+								home))
+					});
 			} else {
 				return model;
 			}
 		}
 	});
 var elm$core$Basics$eq = _Utils_equal;
-var elm$core$List$map = F2(
-	function (f, xs) {
-		return A3(
-			elm$core$List$foldr,
-			F2(
-				function (x, acc) {
-					return A2(
-						elm$core$List$cons,
-						f(x),
-						acc);
-				}),
-			_List_Nil,
-			xs);
-	});
-var elm$core$List$sum = function (numbers) {
-	return A3(elm$core$List$foldl, elm$core$Basics$add, 0, numbers);
-};
 var author$project$Main$resetPlayerScore = F2(
 	function (model, playerId) {
 		var home = A2(

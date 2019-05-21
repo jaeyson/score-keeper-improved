@@ -251,6 +251,8 @@ delete model playerName =
           { model | playerHome = home
                   , playerAway = away
                   , id = Nothing
+                  , scoreHome = home |> List.map .totalPointsScored |> List.sum
+                  , scoreAway = away |> List.map .totalPointsScored |> List.sum
                   , name = ""
                   , inputTeam = ""
           }
@@ -258,11 +260,15 @@ delete model playerName =
           { model | playerHome = home
                   , id = Nothing
                   , name = ""
+                  , scoreHome = home |> List.map .totalPointsScored |> List.sum
+                  , scoreAway = away |> List.map .totalPointsScored |> List.sum
                   , inputTeam = ""
           }
         (False,True) ->
           { model | playerAway = away
                   , id = Nothing
+                  , scoreAway = away |> List.map .totalPointsScored |> List.sum
+                  , scoreHome = home |> List.map .totalPointsScored |> List.sum
                   , name = ""
                   , inputTeam = ""
           }

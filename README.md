@@ -2,7 +2,7 @@
 
 My own take on learning Elm using [Knowthen's](https://github.com/knowthen/elm) Elm tutorial.
 
-![Screenshot of app](C:\Users\yujae\Documents\Frontend Exercise\Elm\score-keeper-improved\screenshot.png)
+![Screenshot of app](screenshot.png)
 
 Visit the [Demo](https://gitcdn.xyz/repo/jaeyson/score-keeper-improved/master/index.html)
 

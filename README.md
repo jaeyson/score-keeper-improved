@@ -1,6 +1,6 @@
 ## Scorekeeper Improved
 
-My own take on learning Elm using [Knowthen's](https://github.com/knowthen/elm) Elm tutorial.
+My own take on learning Elm using Knowthen's [Elm tutorial](https://github.com/knowthen/elm).
 
 ![Screenshot of app](screenshot.png)
 

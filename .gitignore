@@ -7,6 +7,9 @@ elm-stuff
 # elm-repl generated files
 repl-temp-*
 
+# minified js
+**.min.js
+
 ### Node ###
 # Logs
 logs
@@ -94,3 +97,5 @@ typings/
 .dynamodb/
 
 # End of https://www.gitignore.io/api/elm,node
+
+**.DS_Store
